@@ -32,6 +32,11 @@ BeeMusic is a frontend web application designed to simulate a modern music disco
 
 * Modern UI/UX Design Consistent design, animations, and layout
 
+<p align="center">
+  <img src="preview_5" width="48%" style="vertical-align: middle;">
+  <img src="preview_6" width="48%" style="vertical-align: middle;">
+</p>
+
 ---
 
 ## 🛠️ Tech Stack
