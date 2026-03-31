@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>BeeMusic | Artists</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&display=swap">
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <style>
+      #react-toast-root { position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+      .bee-toast { background: #161616; border: 1px solid #2a2a2a; border-left: 3px solid #f4a300; border-radius: 8px; padding: 14px 18px; font-family: 'DM Sans', sans-serif; font-size: 13px; color: #f0f0f0; min-width: 240px; max-width: 300px; pointer-events: all; animation: toastIn 0.3s ease; cursor: pointer; }
+      @keyframes toastIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+      .bee-toast-title { font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: #f4a300; margin-bottom: 4px; font-weight: 600; }
+
+    /* ── ARTIST MODAL ── */
+    #artist-modal-overlay {
+        position: fixed; inset: 0; z-index: 20000;
+        background: rgba(0,0,0,0.85);
+        backdrop-filter: blur(6px);
+        display: none; align-items: center; justify-content: center;
+        padding: 24px;
+        animation: modalFadeIn 0.2s ease;
+    }
+    #artist-modal-overlay.open { display: flex; }
+    @keyframes modalFadeIn { from { opacity:0; } to { opacity:1; } }
+
+    #artist-modal {
+        background: #141414;
+        border: 1px solid rgba(244,163,0,0.25);
+        border-radius: 16px;
+        width: 100%; max-width: 680px;
+        max-height: 90vh; overflow-y: auto;
+        box-shadow: 0 32px 80px rgba(0,0,0,0.8), 0 0 0 1px rgba(244,163,0,0.08);
+        animation: modalSlideUp 0.3s cubic-bezier(0.22,1,0.36,1);
+        scrollbar-width: thin; scrollbar-color: #2a2a2a transparent;
+    }
+    @keyframes modalSlideUp {
+        from { opacity:0; transform: translateY(32px) scale(0.97); }
+        to   { opacity:1; transform: translateY(0) scale(1); }
+    }
+    .modal-header {
+        display: flex; align-items: center; gap: 20px;
+        padding: 28px 28px 20px;
+        border-bottom: 1px solid var(--border);
+        position: relative;
+    }
+    .modal-avatar {
+        width: 80px; height: 80px; border-radius: 50%;
+        background: linear-gradient(135deg,#2a1f00,#f4a300);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 38px; flex-shrink: 0;
+        border: 2px solid rgba(244,163,0,0.4);
+    }
+    .modal-header-info { flex: 1; }
+    .modal-name {
+        font-family: 'ClashDisplay-Variable','Clash Display',sans-serif;
+        font-size: 28px; font-weight: 700; color: var(--text);
+        margin-bottom: 6px;
+    }
+    .modal-genre-pill {
+        display: inline-block;
+        background: rgba(244,163,0,0.12); color: var(--gold);
+        font-size: 10px; font-weight: 600; letter-spacing: 1.5px;
+        text-transform: uppercase; padding: 3px 10px; border-radius: 20px;
+        font-family: 'DM Sans',sans-serif; text-decoration: none;
+    }
+    .modal-close {
+        position: absolute; top: 20px; right: 20px;
+        background: var(--bg-card2); border: 1px solid var(--border);
+        width: 32px; height: 32px; border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        cursor: pointer; color: var(--text-muted); font-size: 16px;
+        transition: all 0.2s; line-height: 1;
+    }
+    .modal-close:hover { border-color: var(--gold); color: var(--text); background: transparent; }
+
+    .modal-body { padding: 24px 28px; }
+
+    .modal-stats-row {
+        display: grid; grid-template-columns: repeat(4,1fr);
+        gap: 12px; margin-bottom: 24px;
+    }
+    .modal-stat {
+        background: var(--bg-card2); border: 1px solid var(--border);
+        border-radius: 8px; padding: 14px 12px; text-align: center;
+    }
+    .modal-stat-val {
+        font-family: 'ClashDisplay-Variable','Clash Display',sans-serif;
+        font-size: 20px; font-weight: 700; color: var(--text);
+        margin-bottom: 3px;
+    }
+    .modal-stat-lbl {
+        font-size: 10px; letter-spacing: 1px; text-transform: uppercase;
+        color: var(--text-muted); font-family: 'DM Sans',sans-serif;
+    }
+
+    .modal-section-title {
+        font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+        color: var(--gold); font-family: 'DM Sans',sans-serif; font-weight: 600;
+        margin-bottom: 12px;
+    }
+
+    /* Waveform EQ bars */
+    .modal-waveform {
+        display: flex; align-items: center; gap: 3px;
+        height: 40px; margin-bottom: 24px;
+    }
+    .modal-waveform-bar {
+        flex: 1; background: var(--border); border-radius: 2px;
+        transition: height 0.15s ease;
+    }
+
+    /* Track list */
+    .modal-tracks { display: flex; flex-direction: column; gap: 2px; margin-bottom: 24px; }
+    .modal-track {
+        display: flex; align-items: center; gap: 14px;
+        padding: 10px 14px; border-radius: 8px;
+        cursor: pointer; transition: background 0.15s;
+    }
+    .modal-track:hover { background: var(--bg-card2); }
+    .modal-track-num {
+        font-size: 12px; color: var(--text-muted); width: 18px;
+        text-align: center; font-family: 'DM Sans',sans-serif;
+        flex-shrink: 0;
+    }
+    .modal-track-play {
+        display: none; font-size: 11px; color: var(--gold);
+    }
+    .modal-track:hover .modal-track-num { display: none; }
+    .modal-track:hover .modal-track-play { display: block; }
+    .modal-track-info { flex: 1; }
+    .modal-track-name {
+        font-size: 14px; font-weight: 500; color: var(--text);
+        font-family: 'DM Sans',sans-serif;
+    }
+    .modal-track-meta { font-size: 12px; color: var(--text-muted); }
+    .modal-track-duration { font-size: 12px; color: var(--text-muted); flex-shrink:0; }
+
+    .modal-footer {
+        padding: 16px 28px;
+        border-top: 1px solid var(--border);
+        display: flex; gap: 10px;
+    }
+    .modal-footer button { flex: 1; }
+    .modal-btn-secondary {
+        background: transparent !important;
+        border: 1px solid var(--border) !important;
+        color: var(--text-muted) !important;
+    }
+    .modal-btn-secondary:hover {
+        border-color: var(--gold) !important;
+        color: var(--text) !important;
+        background: transparent !important;
+    }
+
+    </style>
+    <style>
+        /* ── FEATURED SPOTLIGHT ── */
+        .spotlight {
+            position: relative;
+            margin: 32px 40px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+            align-items: stretch;
+            min-height: 220px;
+        }
+
+        .spotlight-glow {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at 0% 50%, rgba(244,163,0,0.12) 0%, transparent 60%);
+            pointer-events: none;
+        }
+
+        .spotlight-badge {
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            transform: rotate(180deg);
+            background: var(--gold);
+            color: #000;
+            font-family: 'ClashDisplay-Variable', 'Clash Display', sans-serif;
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            padding: 20px 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .spotlight-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3a2800, #f4a300);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            flex-shrink: 0;
+            margin: auto 32px;
+            border: 3px solid var(--gold);
+        }
+
+        .spotlight-info {
+            padding: 32px 32px 32px 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .spotlight-info .hero-label {
+            font-size: 11px;
+            letter-spacing: 2px;
+            color: var(--gold);
+            text-transform: uppercase;
+            font-family: 'DM Sans', sans-serif;
+            font-weight: 500;
+        }
+
+        .spotlight-info h2 {
+            font-family: 'ClashDisplay-Variable', 'Clash Display', sans-serif;
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--text);
+            margin: 0;
+            padding: 0;
+            border: none;
+            background: none;
+        }
+
+        .spotlight-info h2::before { content: none; }
+
+        .spotlight-meta {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .spotlight-meta span {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .spotlight-meta span strong {
+            color: var(--text);
+        }
+
+        .spotlight-streams {
+            font-family: 'ClashDisplay-Variable', 'Clash Display', sans-serif;
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--gold);
+        }
+
+        .spotlight-streams small {
+            font-family: 'DM Sans', sans-serif;
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 400;
+            margin-left: 6px;
+        }
+
+        /* ── FILTERS ── */
+        .filters {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin: 0 40px 24px;
+        }
+
+        .filter-btn {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            padding: 7px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-family: 'DM Sans', sans-serif;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .filter-btn:hover,
+        .filter-btn.active {
+            background: var(--gold);
+            border-color: var(--gold);
+            color: #000;
+            font-weight: 600;
+        }
+
+        /* ── ARTIST GRID ── */
+        .artist-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 16px;
+            margin: 0 40px 40px;
+        }
+
+        .artist-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            transition: border-color 0.2s, transform 0.2s;
+            cursor: default;
+        }
+
+        .artist-card:hover {
+            border-color: var(--gold);
+            transform: translateY(-2px);
+        }
+
+        .card-avatar {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #2a1f00, #f4a300);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+        }
+
+        .card-name {
+            font-family: 'ClashDisplay-Variable', 'Clash Display', sans-serif;
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .card-genre {
+            display: inline-block;
+            background: rgba(244,163,0,0.12);
+            color: var(--gold);
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-family: 'DM Sans', sans-serif;
+        }
+
+        .card-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .card-meta span {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .card-meta span strong {
+            color: var(--text);
+        }
+
+        .card-streams {
+            font-family: 'ClashDisplay-Variable', 'Clash Display', sans-serif;
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--gold);
+        }
+
+        .card-streams small {
+            font-family: 'DM Sans', sans-serif;
+            font-size: 11px;
+            color: var(--text-muted);
+            font-weight: 400;
+            margin-left: 4px;
+        }
+
+        .card-footer {
+            margin-top: auto;
+            padding-top: 12px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 8px;
+        }
+
+        .card-footer button {
+            flex: 1;
+            font-size: 12px;
+            padding: 7px 0;
+        }
+
+        .card-footer .btn-secondary {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+        }
+
+        .card-footer .btn-secondary:hover {
+            border-color: var(--gold);
+            color: var(--text);
+            background: transparent;
+        }
+
+        /* ── SEARCH ── */
+        .artists-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 0 40px 20px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .artists-toolbar h2 {
+            margin: 0;
+            padding: 0;
+            border: none;
+            font-size: 18px;
+        }
+
+        .artists-toolbar h2::before { content: none; }
+
+        .artists-toolbar input {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            color: var(--text);
+            padding: 8px 18px;
+            font-size: 13px;
+            font-family: 'DM Sans', sans-serif;
+            outline: none;
+            width: 220px;
+            transition: border-color 0.2s;
+        }
+
+        .artists-toolbar input:focus { border-color: var(--gold); }
+        .artists-toolbar input::placeholder { color: var(--text-muted); }
+
+    
+    /* ── INLINE WAVEFORM ── */
+    .card-waveform {
+        display: none;
+        align-items: center;
+        gap: 2px;
+        height: 24px;
+        padding: 4px 0;
+    }
+    .card-waveform.playing { display: flex; }
+    .card-waveform-bar {
+        width: 3px;
+        background: var(--gold);
+        border-radius: 2px;
+        opacity: 0.8;
+        transition: height 0.12s ease;
+    }
+    .btn-stream-active {
+        border-color: var(--gold) !important;
+        color: var(--gold) !important;
+        background: rgba(244,163,0,0.08) !important;
+    }
+
+    .no-results {
+            grid-column: 1/-1;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 14px;
+            padding: 40px;
+        }
+    
+        /* ── UNIVERSAL SITE FOOTER ── */
+        .site-footer {
+            background: #0a0a0a;
+            border-top: 1px solid var(--border);
+            padding: 28px 48px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        .footer-logo {
+            font-family: 'ClashDisplay-Variable', 'Clash Display', sans-serif;
+            font-size: 15px;
+            font-weight: 800;
+            color: var(--gold);
+            margin-bottom: 6px;
+        }
+        .site-footer-left p { font-size: 12px; color: var(--text-muted); margin: 0; line-height: 1.7; }
+        .site-footer-center { display: flex; gap: 28px; }
+        .site-footer-center a { font-size: 13px; color: var(--text-muted); text-decoration: none; transition: color 0.2s; }
+        .site-footer-center a:hover { color: var(--text); }
+        .site-footer-right { display: flex; gap: 8px; }
+        .footer-icon-btn {
+            width: 32px; height: 32px; border-radius: 50%;
+            background: var(--bg-card); border: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: center;
+            text-decoration: none; transition: border-color 0.2s;
+        }
+        .footer-icon-btn:hover { border-color: var(--gold); }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+    <a href="home.html" class="nav-logo"><img src="logo.png" alt="Bee Music Logo" class="nav-logo-img">BEE MUSIC</a>
+    <p class="nav-links">
+        <a href="home.html">Home</a>
+        <a href="artists.html" class="active">Artists</a>
+        <a href="upload.html">Upload</a>
+        <a href="contact.html">Contact</a>
+    </p>
+</nav>
+
+<marquee>MEET THE ARTISTS &nbsp;&nbsp;&nbsp;✦&nbsp;&nbsp;&nbsp; RISING STARS ON BEE MUSIC &nbsp;&nbsp;&nbsp;✦&nbsp;&nbsp;&nbsp; STREAM • DISCOVER • SUPPORT &nbsp;&nbsp;&nbsp;✦&nbsp;&nbsp;&nbsp; BEEMUSIC.IN</marquee>
+
+<!-- PAGE HEADER -->
+<div style="padding: 40px 40px 0;">
+    <p class="hero-label" style="font-size:11px;letter-spacing:3px;color:var(--gold);text-transform:uppercase;font-family:'DM Sans',sans-serif;font-weight:500;margin-bottom:10px;">Our Roster</p>
+    <h1 style="font-family:'ClashDisplay-Variable','Clash Display',sans-serif;font-size:36px;font-weight:800;color:var(--text);margin-bottom:6px;">Rising Artists</h1>
+    <p style="color:var(--text-muted);font-size:14px;margin-bottom:32px;">Discover independent vocal talent pushing the boundaries of sound.</p>
+</div>
+
+<!-- FEATURED SPOTLIGHT -->
+<div class="spotlight">
+    <div class="spotlight-glow"></div>
+    <div class="spotlight-badge" style="cursor:pointer;" onclick="window.location.href='genre.html?genre=Devotional'">Featured</div>
+    <div class="spotlight-avatar">🎤</div>
+    <div class="spotlight-info">
+        <p class="hero-label">Artist of the Month</p>
+        <h2>Lakshmi</h2>
+        <div class="spotlight-meta">
+            <span>Genre: <strong>Devotional</strong></span>
+            <span>Language: <strong>Tamil</strong></span>
+            <span>Experience: <strong>3 Years</strong></span>
+        </div>
+        <div>
+            <div class="spotlight-streams">34,500 <small>streams</small></div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:8px;">
+            <button onclick="likeArtist('Lakshmi')" style="padding:8px 20px;font-size:13px;">❤ Like</button>
+            <button style="padding:8px 20px;font-size:13px;background:transparent;border:1px solid var(--border);color:var(--text-muted);" onmouseover="this.style.borderColor='var(--gold)';this.style.color='var(--text)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-muted)'">▶ Stream</button>
+        </div>
+    </div>
+</div>
+
+<!-- TOOLBAR -->
+<div class="artists-toolbar">
+    <h2 style="font-family:'ClashDisplay-Variable','Clash Display',sans-serif;font-weight:700;color:var(--text);">All Artists <span id="countLabel" style="font-size:13px;color:var(--text-muted);font-weight:400;margin-left:6px;">20 artists</span></h2>
+    <input type="text" id="artistSearch" placeholder="Search artists..." oninput="filterCards()">
+</div>
+
+<!-- GENRE FILTERS -->
+<div class="filters">
+    <button class="filter-btn active" onclick="setFilter('All', this)">All</button>
+    <button class="filter-btn" onclick="setFilter('Indie', this)">Indie</button>
+    <button class="filter-btn" onclick="setFilter('Classical Fusion', this)">Classical Fusion</button>
+    <button class="filter-btn" onclick="setFilter('Pop', this)">Pop</button>
+    <button class="filter-btn" onclick="setFilter('Melody', this)">Melody</button>
+    <button class="filter-btn" onclick="setFilter('Acoustic', this)">Acoustic</button>
+    <button class="filter-btn" onclick="setFilter('Carnatic', this)">Carnatic</button>
+    <button class="filter-btn" onclick="setFilter('Rock Fusion', this)">Rock Fusion</button>
+    <button class="filter-btn" onclick="setFilter('Sufi', this)">Sufi</button>
+    <button class="filter-btn" onclick="setFilter('Fusion Jazz', this)">Fusion Jazz</button>
+    <button class="filter-btn" onclick="setFilter('Ghazal', this)">Ghazal</button>
+    <button class="filter-btn" onclick="setFilter('Indie Rock', this)">Indie Rock</button>
+    <button class="filter-btn" onclick="setFilter('Devotional', this)">Devotional</button>
+</div>
+
+<!-- ARTIST CARDS -->
+<div class="artist-grid" id="artistGrid">
+
+    <div class="artist-card" data-genre="Classical Fusion" data-name="Rahul">
+        <div class="card-avatar">🎻</div>
+        <div><div class="card-name" onclick="openModal('Rahul')" style="cursor:pointer;" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--text)'">Rahul</div><a class="card-genre" href="genre.html?genre=Classical%20Fusion" style="text-decoration:none;">Classical Fusion</a></div>
+        <div class="card-meta"><span>Language: <strong>Tamil</strong></span><span>Experience: <strong>3 years</strong></span></div>
+        <div class="card-streams">18,200 <small>streams</small></div>
+        <div class="card-waveform" id="wf-Rahul"></div>
+        <div class="card-footer"><button onclick="likeArtist('Rahul')">❤ Like</button><button id="sbtn-Rahul" class="btn-secondary" onclick="toggleStream('Rahul', this)">▶ Stream</button></div>
+    </div>
+
+    <div class="artist-card" data-genre="Indie" data-name="Ananya">
+        <div class="card-avatar">🎵</div>
+        <div><div class="card-name" onclick="openModal('Ananya')" style="cursor:pointer;" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--text)'">Ananya</div><a class="card-genre" href="genre.html?genre=Indie" style="text-decoration:none;">Indie</a></div>
+        <div class="card-meta"><span>Language: <strong>English</strong></span><span>Experience: <strong>2 years</strong></span></div>
+        <div class="card-streams">12,500 <small>streams</small></div>
+        <div class="card-waveform" id="wf-Ananya"></div>
+        <div class="card-footer"><button onclick="likeArtist('Ananya')">❤ Like</button><button id="sbtn-Ananya" class="btn-secondary" onclick="toggleStream('Ananya', this)">▶ Stream</button></div>
+    </div>
+
+    <div class="artist-card" data-genre="Pop" data-name="Meera">
+        <div class="card-avatar">🎤</div>
+        <div><div class="card-name" onclick="openModal('Meera')" style="cursor:pointer;" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--text)'">Meera</div><a class="card-genre" href="genre.html?genre=Pop" style="text-decoration:none;">Pop</a></div>
+        <div class="card-meta"><span>Language: <strong>Hindi</strong></span><span>Experience: <strong>1 year</strong></span></div>
+        <div class="card-streams">9,800 <small>streams</small></div>
+        <div class="card-waveform" id="wf-Meera"></div>
+        <div class="card-footer"><button onclick="likeArtist('Meera')">❤ Like</button><button id="sbtn-Meera" class="btn-secondary" onclick="toggleStream('Meera', this)">▶ Stream</button></div>
+    </div>
+
+    <div class="artist-card" data-genre="Melody" data-name="Karthik">
+        <div class="card-avatar">🎼</div>
+        <div><div class="card-name" onclick="openModal('Karthik')" style="cursor:pointer;" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--text)'">Karthik</div><a class="card-genre" href="genre.html?genre=Melody" style="text-decoration:none;">Melody</a></div>
+        <div class="card-meta"><span>Language: <strong>Tamil</strong></span><span>Experience: <strong>2 years</strong></span></div>
+        <div class="card-streams">7,400 <small>streams</small></div>
+        <div class="card-waveform" id="wf-Karthik"></div>
+        <div class="card-footer"><button onclick="likeArtist('Karthik')">❤ Like</button><button id="sbtn-Karthik" class="btn-secondary" onclick="toggleStream('Karthik', this)">▶ Stream</button></div>
+    </div>
+
+    <div class="artist-card" data-genre="Acoustic" data-name="Neha">
+        <div class="card-avatar">🪕</div>
+        <div><div class="card-name" onclick="openModal('Neha')" style="cursor:pointer;" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--text)'">Neha</div><a class="card-genre" href="genre.html?genre=Acoustic" style="text-decoration:none;">Acoustic</a></div>
+        <div class="card-meta"><span>Language: <strong>English</strong></span><span>Experience: <strong>1 year</strong></span></div>
+        <div class="card-streams">6,950 <small>streams</small></div>
+        <div class="card-waveform" id="wf-Neha"></div>
+        <div class="card-footer"><button onclick="likeArtist('Neha')">❤ Like</button><button id="sbtn-Neha" class="btn-secondary" onclick="toggleStream('Neha', this)">▶ Stream</button></div>
+    </div>
+
+    <div class="artist-card" data-genre="Carnatic" data-name="Priya">
+        <div class="card-avatar">🎹</div>
+        <div><div class="card-name" onclick="openModal('Priya')" style="cursor:pointer;" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--text)'">Priya</div><a class="card-genre" href="genre.html?genre=Carnatic" style="text-decoration:none;">Carnatic</a></div>
+        <div class="card-meta"><span>Language: <strong>Telugu</strong></span><span>Experience: <strong>4 years</strong></span></div>
+        <div class="card-streams">23,100 <small>streams</small></div>
+        <div class="card-waveform" id="wf-Priya"></div>
+        <div class="card-footer"><button onclick="likeArtist('Priya')">❤ Like</button><button id="sbtn-Priya" class="btn-secondary" onclick="toggleStream('Priya', this)">▶ Stream</button></div>
+    </div>
+
+    <div class="artist-card" data-genre="Rock Fusion" data-name="Arjun">
+        <div class="card-avatar">🎸</div>
+        <div><div class="card-name" onclick="openModal('Arjun')" style="cursor:pointer;" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--text)'">Arjun</div><a class="card-genre" href="genre.html?genre=Rock%20Fusion" style="text-decoration:none;">Rock Fusion</a></div>
+        <div class="card-meta"><span>Language: <strong>Hindi</strong></span><span>Experience: <strong>5 years</strong></span></div>
+        <div class="card-streams">31,400 <small>streams</small></div>
+        <div class="card-waveform" id="wf-Arjun"></div>
+        <div class="card-footer"><button onclick="likeArtist('Arjun')">❤ Like</button><button id="sbtn-Arjun" class="btn-secondary" onclick="toggleStream('Arjun', this)">▶ Stream</button></div>
+    </div>
+
+    <div class="artist-card" data-genre="Sufi" data-name="Divya">
+        <div class="card-avatar">🎙️</div>
+        <div><div class="card-name" onclick="openModal('Divya')" style="cursor:pointer;" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--text)'">Divya</div><a class="card-genre" href="genre.html?genre=Sufi" style="text-decoration:none;">Sufi</a></div>
+        <div class="card-meta"><span>Language: <strong>Urdu</strong></span><span>Experience: <strong>3 years</strong></span></div>
+        <div class="card-streams">15,600 <small>streams</small></div>
+        <div class="card-waveform" id="wf-Divya"></div>
+        <div class="card-footer"><button onclick="likeArtist('Divya')">❤ Like</button><button id="sbtn-Divya" class="btn-secondary" onclick="toggleStream('Divya', this)">▶ Stream</button></div>
+    </div>
+
+    <div class="artist-card" data-genre="Fusion Jazz" data-name="Vikram">
+        <div class="card-avatar">🥁</div>
+        <div><div class="card-name" onclick="openModal('Vikram')" style="cursor:pointer;" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--text)'">Vikram</div><a class="card-genre" href="genre.html?genre=Fusion%20Jazz" style="text-decoration:none;">Fusion Jazz</a></div>
+        <div class="card-meta"><span>Language: <strong>Tamil</strong></span><span>Experience: <strong>6 years</strong></span></div>
+        <div class="card-streams">28,900 <small>streams</small></div>
+        <div class="card-waveform" id="wf-Vikram"></div>
+        <div class="card-footer"><button onclick="likeArtist('Vikram')">❤ Like</button><button id="sbtn-Vikram" class="btn-secondary" onclick="toggleStream('Vikram', this)">▶ Stream</button></div>
+    </div>
+
+    <div class="artist-card" data-genre="Ghazal" data-name="Sana">
+        <div class="card-avatar">🎵</div>
+        <div><div class="card-name" onclick="openModal('Sana')" style="cursor:pointer;" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--text)'">Sana</div><a class="card-genre" href="genre.html?genre=Ghazal" style="text-decoration:none;">Ghazal</a></div>
+        <div class="card-meta"><span>Language: <strong>Hindi</strong></span><span>Experience: <strong>2 years</strong></span></div>
+        <div class="card-streams">11,200 <small>streams</small></div>
+        <div class="card-waveform" id="wf-Sana"></div>
+        <div class="card-footer"><button onclick="likeArtist('Sana')">❤ Like</button><button id="sbtn-Sana" class="btn-secondary" onclick="toggleStream('Sana', this)">▶ Stream</button></div>
+    </div>
+
+    <div class="artist-card" data-genre="Indie Rock" data-name="Rohan">
+        <div class="card-avatar">🎸</div>
+        <div><div class="card-name" onclick="openModal('Rohan')" style="cursor:pointer;" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--text)'">Rohan</div><a class="card-genre" href="genre.html?genre=Indie%20Rock" style="text-decoration:none;">Indie Rock</a></div>
+        <div class="card-meta"><span>Language: <strong>English</strong></span><span>Experience: <strong>3 years</strong></span></div>
+        <div class="card-streams">19,700 <small>streams</small></div>
+        <div class="card-waveform" id="wf-Rohan"></div>
+        <div class="card-footer"><button onclick="likeArtist('Rohan')">❤ Like</button><button id="sbtn-Rohan" class="btn-secondary" onclick="toggleStream('Rohan', this)">▶ Stream</button></div>
+    </div>
+
+    <div class="artist-card" data-genre="Devotional" data-name="Lakshmi">
+        <div class="card-avatar">🎤</div>
+        <div><div class="card-name" onclick="openModal('Lakshmi')" style="cursor:pointer;" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--text)'">Lakshmi</div><a class="card-genre" href="genre.html?genre=Devotional" style="text-decoration:none;">Devotional</a></div>
+        <div class="card-meta"><span>Language: <strong>Sanskrit</strong></span><span>Experience: <strong>7 years</strong></span></div>
+        <div class="card-streams">34,500 <small>streams</small></div>
+        <div class="card-waveform" id="wf-Lakshmi"></div>
+        <div class="card-footer"><button onclick="likeArtist('Lakshmi')">❤ Like</button><button id="sbtn-Lakshmi" class="btn-secondary" onclick="toggleStream('Lakshmi', this)">▶ Stream</button></div>
+    </div>
+    <div class="artist-card" data-genre="Indie" data-name="Zara">
+        <div class="card-avatar">🎧</div>
+        <div><div class="card-name" onclick="openModal('Zara')" style="cursor:pointer;" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--text)'">Zara</div><a class="card-genre" href="genre.html?genre=Indie" style="text-decoration:none;">Indie</a></div>
+        <div class="card-meta"><span>Language: <strong>English</strong></span><span>Experience: <strong>3 years</strong></span></div>
+        <div class="card-streams">14,300 <small>streams</small></div>
+        <div class="card-waveform" id="wf-Zara"></div>
+        <div class="card-footer"><button onclick="likeArtist('Zara')">❤ Like</button><button id="sbtn-Zara" class="btn-secondary" onclick="toggleStream('Zara', this)">▶ Stream</button></div>
+    </div>
+
+    <div class="artist-card" data-genre="Carnatic" data-name="Suresh">
+        <div class="card-avatar">🪗</div>
+        <div><div class="card-name" onclick="openModal('Suresh')" style="cursor:pointer;" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--text)'">Suresh</div><a class="card-genre" href="genre.html?genre=Carnatic" style="text-decoration:none;">Carnatic</a></div>
+        <div class="card-meta"><span>Language: <strong>Tamil</strong></span><span>Experience: <strong>5 years</strong></span></div>
+        <div class="card-streams">20,400 <small>streams</small></div>
+        <div class="card-waveform" id="wf-Suresh"></div>
+        <div class="card-footer"><button onclick="likeArtist('Suresh')">❤ Like</button><button id="sbtn-Suresh" class="btn-secondary" onclick="toggleStream('Suresh', this)">▶ Stream</button></div>
+    </div>
+
+    <div class="artist-card" data-genre="Pop" data-name="Ishaan">
+        <div class="card-avatar">🎤</div>
+        <div><div class="card-name" onclick="openModal('Ishaan')" style="cursor:pointer;" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--text)'">Ishaan</div><a class="card-genre" href="genre.html?genre=Pop" style="text-decoration:none;">Pop</a></div>
+        <div class="card-meta"><span>Language: <strong>Hindi</strong></span><span>Experience: <strong>2 years</strong></span></div>
+        <div class="card-streams">8,750 <small>streams</small></div>
+        <div class="card-waveform" id="wf-Ishaan"></div>
+        <div class="card-footer"><button onclick="likeArtist('Ishaan')">❤ Like</button><button id="sbtn-Ishaan" class="btn-secondary" onclick="toggleStream('Ishaan', this)">▶ Stream</button></div>
+    </div>
+
+    <div class="artist-card" data-genre="Rock Fusion" data-name="Dev">
+        <div class="card-avatar">🎸</div>
+        <div><div class="card-name" onclick="openModal('Dev')" style="cursor:pointer;" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--text)'">Dev</div><a class="card-genre" href="genre.html?genre=Rock%20Fusion" style="text-decoration:none;">Rock Fusion</a></div>
+        <div class="card-meta"><span>Language: <strong>English</strong></span><span>Experience: <strong>4 years</strong></span></div>
+        <div class="card-streams">26,100 <small>streams</small></div>
+        <div class="card-waveform" id="wf-Dev"></div>
+        <div class="card-footer"><button onclick="likeArtist('Dev')">❤ Like</button><button id="sbtn-Dev" class="btn-secondary" onclick="toggleStream('Dev', this)">▶ Stream</button></div>
+    </div>
+
+    <div class="artist-card" data-genre="Sufi" data-name="Amir">
+        <div class="card-avatar">🎙️</div>
+        <div><div class="card-name" onclick="openModal('Amir')" style="cursor:pointer;" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--text)'">Amir</div><a class="card-genre" href="genre.html?genre=Sufi" style="text-decoration:none;">Sufi</a></div>
+        <div class="card-meta"><span>Language: <strong>Urdu</strong></span><span>Experience: <strong>4 years</strong></span></div>
+        <div class="card-streams">17,800 <small>streams</small></div>
+        <div class="card-waveform" id="wf-Amir"></div>
+        <div class="card-footer"><button onclick="likeArtist('Amir')">❤ Like</button><button id="sbtn-Amir" class="btn-secondary" onclick="toggleStream('Amir', this)">▶ Stream</button></div>
+    </div>
+
+    <div class="artist-card" data-genre="Devotional" data-name="Padma">
+        <div class="card-avatar">🪔</div>
+        <div><div class="card-name" onclick="openModal('Padma')" style="cursor:pointer;" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--text)'">Padma</div><a class="card-genre" href="genre.html?genre=Devotional" style="text-decoration:none;">Devotional</a></div>
+        <div class="card-meta"><span>Language: <strong>Sanskrit</strong></span><span>Experience: <strong>5 years</strong></span></div>
+        <div class="card-streams">29,200 <small>streams</small></div>
+        <div class="card-waveform" id="wf-Padma"></div>
+        <div class="card-footer"><button onclick="likeArtist('Padma')">❤ Like</button><button id="sbtn-Padma" class="btn-secondary" onclick="toggleStream('Padma', this)">▶ Stream</button></div>
+    </div>
+
+    <div class="artist-card" data-genre="Ghazal" data-name="Naseem">
+        <div class="card-avatar">🎵</div>
+        <div><div class="card-name" onclick="openModal('Naseem')" style="cursor:pointer;" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--text)'">Naseem</div><a class="card-genre" href="genre.html?genre=Ghazal" style="text-decoration:none;">Ghazal</a></div>
+        <div class="card-meta"><span>Language: <strong>Hindi</strong></span><span>Experience: <strong>3 years</strong></span></div>
+        <div class="card-streams">9,600 <small>streams</small></div>
+        <div class="card-waveform" id="wf-Naseem"></div>
+        <div class="card-footer"><button onclick="likeArtist('Naseem')">❤ Like</button><button id="sbtn-Naseem" class="btn-secondary" onclick="toggleStream('Naseem', this)">▶ Stream</button></div>
+    </div>
+
+    <div class="artist-card" data-genre="Fusion Jazz" data-name="Tara">
+        <div class="card-avatar">🎷</div>
+        <div><div class="card-name" onclick="openModal('Tara')" style="cursor:pointer;" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--text)'">Tara</div><a class="card-genre" href="genre.html?genre=Fusion%20Jazz" style="text-decoration:none;">Fusion Jazz</a></div>
+        <div class="card-meta"><span>Language: <strong>English</strong></span><span>Experience: <strong>4 years</strong></span></div>
+        <div class="card-streams">22,500 <small>streams</small></div>
+        <div class="card-waveform" id="wf-Tara"></div>
+        <div class="card-footer"><button onclick="likeArtist('Tara')">❤ Like</button><button id="sbtn-Tara" class="btn-secondary" onclick="toggleStream('Tara', this)">▶ Stream</button></div>
+    </div>
+
+
+
+<!-- ARTIST PROFILE MODAL -->
+<div id="artist-modal-overlay" onclick="if(event.target===this)closeModal()">
+    <div id="artist-modal">
+        <div class="modal-header">
+            <div class="modal-avatar" id="modal-avatar">🎵</div>
+            <div class="modal-header-info">
+                <div class="modal-name" id="modal-name">—</div>
+                <div style="display:flex;align-items:center;gap:10px;margin-top:6px;">
+                    <a class="modal-genre-pill" id="modal-genre" href="#">—</a>
+                    <span style="font-size:12px;color:var(--text-muted);font-family:'DM Sans',sans-serif;" id="modal-lang-yrs"></span>
+                </div>
+            </div>
+            <button class="modal-close" onclick="closeModal()">✕</button>
+        </div>
+        <div class="modal-body">
+            <!-- Stats -->
+            <div class="modal-stats-row">
+                <div class="modal-stat">
+                    <div class="modal-stat-val" id="modal-streams">—</div>
+                    <div class="modal-stat-lbl">Streams</div>
+                </div>
+                <div class="modal-stat">
+                    <div class="modal-stat-val" id="modal-trend">—</div>
+                    <div class="modal-stat-lbl">Growth</div>
+                </div>
+                <div class="modal-stat">
+                    <div class="modal-stat-val" id="modal-tracks-count">—</div>
+                    <div class="modal-stat-lbl">Tracks</div>
+                </div>
+                <div class="modal-stat">
+                    <div class="modal-stat-val" id="modal-fans">—</div>
+                    <div class="modal-stat-lbl">Fans</div>
+                </div>
+            </div>
+
+            <!-- Live EQ waveform -->
+            <div class="modal-section-title">Live Preview</div>
+            <div class="modal-waveform" id="modal-waveform"></div>
+
+            <!-- Track list -->
+            <div class="modal-section-title">Top Tracks</div>
+            <div class="modal-tracks" id="modal-tracks"></div>
+        </div>
+        <div class="modal-footer">
+            <button id="modal-like-btn" onclick="modalLike()">❤ Like Artist</button>
+            <a id="modal-genre-btn" href="#" class="modal-btn-secondary" style="display:flex;align-items:center;justify-content:center;text-decoration:none;border-radius:var(--radius);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;padding:10px 20px;flex:1;cursor:pointer;background:transparent;border:1px solid var(--border);color:var(--text-muted);" onmouseover="this.style.borderColor='var(--gold)';this.style.color='var(--text)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-muted)'">Explore Genre →</a>
+        </div>
+    </div>
+</div>
+
+<!-- Universal liked panel provided by liked-artists.js -->
+
+<div class="site-footer">
+    <div class="site-footer-left">
+        <div class="footer-logo"><img src="logo.png" alt="Bee Music Logo" class="footer-logo-img">BEE MUSIC</div>
+        <p>© 2025–26 BEE MUSIC. All rights reserved.</p>
+        <p style="margin-top:4px;font-size:11px;color:#444;">Web Programming Laboratory &nbsp;·&nbsp; Siddhartha Gupta &nbsp;·&nbsp; 24BCE5063</p>
+    </div>
+    <div class="site-footer-center">
+        <a href="home.html">Home</a>
+        <a href="artists.html">Artists</a>
+        <a href="upload.html">Upload</a>
+        <a href="contact.html">Contact</a>
+    </div>
+</div>
+<script>
+    var activeGenre = 'All';
+
+    function likeArtist(name) {
+        var card = document.querySelector('[data-name="' + name + '"]');
+        var emojiEl = card ? card.querySelector('.card-avatar') : null;
+        var emoji = emojiEl ? emojiEl.textContent.trim() : '🎵';
+        window.likeArtist(name, emoji);
+    }
+
+    function setFilter(genre, btn) {
+        activeGenre = genre;
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        filterCards();
+    }
+
+    function filterCards() {
+        var search = document.getElementById('artistSearch').value.toLowerCase();
+        var cards = document.querySelectorAll('.artist-card');
+        var visible = 0;
+        cards.forEach(function(card) {
+            var genreMatch = activeGenre === 'All' || card.dataset.genre === activeGenre;
+            var nameMatch = card.dataset.name.toLowerCase().includes(search) ||
+                            card.dataset.genre.toLowerCase().includes(search);
+            if (genreMatch && nameMatch) {
+                card.style.display = '';
+                visible++;
+            } else {
+                card.style.display = 'none';
+            }
+        });
+        document.getElementById('countLabel').innerHTML = visible + ' artist' + (visible !== 1 ? 's' : '');
+        var old = document.querySelector('.no-results');
+        if (old) old.remove();
+        if (visible === 0) {
+            var msg = document.createElement('div');
+            msg.className = 'no-results';
+            msg.textContent = 'No artists found.';
+            document.getElementById('artistGrid').appendChild(msg);
+        }
+    }
+</script>
+
+<script>
+// ── ARTIST MODAL ──
+const ARTIST_DATA = [
+    { name:"Rahul",   emoji:"🎻", genre:"Classical Fusion", lang:"Tamil",    yrs:3, streams:18200,  trend:12, fans:1420, tracks:[
+        { name:"Raga Sunrise",      duration:"4:12", streams:8200  },
+        { name:"Midnight Veena",    duration:"3:47", streams:5600  },
+        { name:"City of Strings",   duration:"5:01", streams:4400  },
+    ]},
+    { name:"Ananya",  emoji:"🎵", genre:"Indie",            lang:"English",  yrs:2, streams:12500,  trend:8,  fans:980,  tracks:[
+        { name:"Paper Walls",       duration:"3:22", streams:5800  },
+        { name:"Glass Hours",       duration:"4:05", streams:4200  },
+        { name:"Signal Lost",       duration:"3:58", streams:2500  },
+    ]},
+    { name:"Meera",   emoji:"🎤", genre:"Pop",              lang:"Hindi",    yrs:1, streams:9800,   trend:21, fans:820,  tracks:[
+        { name:"Dil Mera",          duration:"3:10", streams:4900  },
+        { name:"Ek Pal",            duration:"3:33", streams:3100  },
+        { name:"Sapne Mein",        duration:"2:58", streams:1800  },
+    ]},
+    { name:"Karthik", emoji:"🎼", genre:"Melody",           lang:"Tamil",    yrs:2, streams:7400,   trend:5,  fans:610,  tracks:[
+        { name:"Nila Kaadhal",      duration:"4:20", streams:3800  },
+        { name:"Vaan Megam",        duration:"3:55", streams:2400  },
+        { name:"Mazhai Neram",      duration:"4:44", streams:1200  },
+    ]},
+    { name:"Neha",    emoji:"🪕", genre:"Acoustic",         lang:"English",  yrs:1, streams:6950,   trend:3,  fans:540,  tracks:[
+        { name:"Wooden Heart",      duration:"2:48", streams:3200  },
+        { name:"Open Road",         duration:"3:14", streams:2400  },
+        { name:"Sunday Porch",      duration:"3:02", streams:1350  },
+    ]},
+    { name:"Priya",   emoji:"🎹", genre:"Carnatic",         lang:"Telugu",   yrs:4, streams:23100,  trend:18, fans:1890, tracks:[
+        { name:"Bhairavi Bloom",    duration:"6:12", streams:9800  },
+        { name:"Todi at Dusk",      duration:"5:34", streams:7200  },
+        { name:"Mohanam Morning",   duration:"7:01", streams:6100  },
+    ]},
+    { name:"Arjun",   emoji:"🎸", genre:"Rock Fusion",      lang:"Hindi",    yrs:5, streams:31400,  trend:7,  fans:2600, tracks:[
+        { name:"Monsoon Rock",      duration:"4:38", streams:14200 },
+        { name:"Delhi Nights",      duration:"3:52", streams:9800  },
+        { name:"Broken Idol",       duration:"5:10", streams:7400  },
+    ]},
+    { name:"Divya",   emoji:"🎙️", genre:"Sufi",             lang:"Urdu",     yrs:3, streams:15600,  trend:14, fans:1320, tracks:[
+        { name:"Ishq Ka Rang",      duration:"5:20", streams:7400  },
+        { name:"Raat Ki Dua",       duration:"4:45", streams:5200  },
+        { name:"Dard-e-Dil",        duration:"6:02", streams:3000  },
+    ]},
+    { name:"Vikram",  emoji:"🥁", genre:"Fusion Jazz",      lang:"Tamil",    yrs:6, streams:28900,  trend:9,  fans:2100, tracks:[
+        { name:"Midnight Tabla",    duration:"5:50", streams:12400 },
+        { name:"Blue Raga",         duration:"6:22", streams:9800  },
+        { name:"Chennai Cool",      duration:"4:58", streams:6700  },
+    ]},
+    { name:"Sana",    emoji:"🎵", genre:"Ghazal",           lang:"Hindi",    yrs:2, streams:11200,  trend:25, fans:890,  tracks:[
+        { name:"Dil Ki Baat",       duration:"4:15", streams:5200  },
+        { name:"Woh Lamhe",         duration:"4:50", streams:3800  },
+        { name:"Teri Yaad",         duration:"5:05", streams:2200  },
+    ]},
+    { name:"Rohan",   emoji:"🎸", genre:"Indie Rock",       lang:"English",  yrs:3, streams:19700,  trend:11, fans:1650, tracks:[
+        { name:"City Lights",       duration:"3:45", streams:9200  },
+        { name:"Rust & Rain",       duration:"4:20", streams:6500  },
+        { name:"Static Love",       duration:"3:58", streams:4000  },
+    ]},
+    { name:"Lakshmi", emoji:"🎤", genre:"Devotional",       lang:"Sanskrit", yrs:7, streams:34500,  trend:4,  fans:2900, tracks:[
+        { name:"Saraswati Vandana", duration:"7:30", streams:16200 },
+        { name:"Om Namah Shivaya",  duration:"8:12", streams:11400 },
+        { name:"Bhavani Ashtakam", duration:"6:45", streams:6900  },
+    ]},
+
+    { name:"Zara",    emoji:"🎧", genre:"Indie",           lang:"English",  yrs:3, streams:14300,  trend:16, fans:1100, tracks:[
+        { name:"Neon Bones",        duration:"3:42", streams:6800  },
+        { name:"Saltwater",         duration:"4:01", streams:4900  },
+        { name:"Glass Half",        duration:"3:55", streams:2600  },
+    ]},
+    { name:"Suresh",  emoji:"🪗", genre:"Carnatic",        lang:"Tamil",    yrs:5, streams:20400,  trend:13, fans:1750, tracks:[
+        { name:"Bhairavi Alapana",  duration:"8:20", streams:9200  },
+        { name:"Todi Varnaam",      duration:"6:44", streams:7100  },
+        { name:"Kalyani Swaram",    duration:"7:30", streams:4100  },
+    ]},
+    { name:"Ishaan",  emoji:"🎤", genre:"Pop",              lang:"Hindi",    yrs:2, streams:8750,   trend:19, fans:720,  tracks:[
+        { name:"Kal Phir Aana",     duration:"3:30", streams:4200  },
+        { name:"Rooftop Nights",    duration:"3:55", streams:2900  },
+        { name:"Dooriyaan",         duration:"4:10", streams:1650  },
+    ]},
+    { name:"Dev",     emoji:"🎸", genre:"Rock Fusion",      lang:"English",  yrs:4, streams:26100,  trend:10, fans:2200, tracks:[
+        { name:"Thunder Raga",      duration:"4:50", streams:12300 },
+        { name:"Steel & Silk",      duration:"5:05", streams:8900  },
+        { name:"Voltage",           duration:"4:22", streams:4900  },
+    ]},
+    { name:"Amir",    emoji:"🎙️", genre:"Sufi",             lang:"Urdu",     yrs:4, streams:17800,  trend:12, fans:1480, tracks:[
+        { name:"Khwab Ki Raat",     duration:"5:45", streams:8200  },
+        { name:"Dua",               duration:"4:58", streams:5900  },
+        { name:"Rooh Ki Pyaas",     duration:"6:10", streams:3700  },
+    ]},
+    { name:"Padma",   emoji:"🪔", genre:"Devotional",       lang:"Sanskrit", yrs:5, streams:29200,  trend:6,  fans:2450, tracks:[
+        { name:"Devi Stotram",      duration:"6:55", streams:13400 },
+        { name:"Ganesh Vandana",    duration:"5:30", streams:9800  },
+        { name:"Vishnu Sahasra",    duration:"8:00", streams:6000  },
+    ]},
+    { name:"Naseem",  emoji:"🎵", genre:"Ghazal",           lang:"Hindi",    yrs:3, streams:9600,   trend:20, fans:810,  tracks:[
+        { name:"Shaam-e-Ghazal",    duration:"4:30", streams:4600  },
+        { name:"Tanhai",            duration:"5:10", streams:3200  },
+        { name:"Zindagi Ke Rang",   duration:"4:50", streams:1800  },
+    ]},
+    { name:"Tara",    emoji:"🎷", genre:"Fusion Jazz",      lang:"English",  yrs:4, streams:22500,  trend:15, fans:1900, tracks:[
+        { name:"Monsoon Miles",     duration:"6:10", streams:10200 },
+        { name:"Silk Route",        duration:"5:40", streams:7800  },
+        { name:"Chennai Blue",      duration:"4:55", streams:4500  },
+    ]},
+];
+
+var _currentArtist = null;
+var _waveInterval  = null;
+
+function openModal(name) {
+    const a = ARTIST_DATA.find(x => x.name === name);
+    if (!a) return;
+    _currentArtist = a;
+
+    document.getElementById('modal-avatar').textContent   = a.emoji;
+    document.getElementById('modal-name').textContent     = a.name;
+    const genreEl = document.getElementById('modal-genre');
+    genreEl.textContent = a.genre;
+    genreEl.href = 'genre.html?genre=' + encodeURIComponent(a.genre);
+    document.getElementById('modal-lang-yrs').textContent = a.lang + ' · ' + a.yrs + ' yr' + (a.yrs > 1 ? 's' : '');
+    document.getElementById('modal-streams').textContent  = a.streams.toLocaleString();
+    document.getElementById('modal-trend').textContent    = '+' + a.trend + '%';
+    document.getElementById('modal-trend').style.color    = a.trend >= 10 ? '#4ade80' : a.trend >= 5 ? 'var(--gold)' : 'var(--text-muted)';
+    document.getElementById('modal-tracks-count').textContent = a.tracks.length;
+    document.getElementById('modal-fans').textContent     = a.fans.toLocaleString();
+    document.getElementById('modal-genre-btn').href       = 'genre.html?genre=' + encodeURIComponent(a.genre);
+
+    // Like button state
+    var likeBtn = document.getElementById('modal-like-btn');
+    try {
+        var liked = JSON.parse(localStorage.getItem('bee_liked') || '[]');
+        var already = liked.find(function(x){ return x.name === a.name; });
+        likeBtn.textContent = already ? '❤ Liked' : '❤ Like Artist';
+        likeBtn.style.background = already ? 'rgba(244,163,0,0.15)' : '';
+        likeBtn.style.border = already ? '1px solid var(--gold)' : '';
+        likeBtn.style.color = already ? 'var(--gold)' : '';
+    } catch(e) {}
+
+    // Tracks
+    var tHtml = a.tracks.map(function(t, i) {
+        return '<div class="modal-track">'
+            + '<div class="modal-track-num">' + (i+1) + '</div>'
+            + '<div class="modal-track-play">▶</div>'
+            + '<div class="modal-track-info">'
+            +   '<div class="modal-track-name">' + t.name + '</div>'
+            +   '<div class="modal-track-meta">' + t.streams.toLocaleString() + ' streams</div>'
+            + '</div>'
+            + '<div class="modal-track-duration">' + t.duration + '</div>'
+            + '</div>';
+    }).join('');
+    document.getElementById('modal-tracks').innerHTML = tHtml;
+
+    // Waveform
+    var wf = document.getElementById('modal-waveform');
+    wf.innerHTML = '';
+    var bars = [];
+    var heights = [14,22,10,30,18,8,26,12,20,28,10,16,24,8,32,14,20,10,26,18,12,28,8,22,16,30,10,20,14,24];
+    heights.forEach(function(h) {
+        var b = document.createElement('div');
+        b.className = 'modal-waveform-bar';
+        b.style.height = h + 'px';
+        b.style.background = 'var(--gold)';
+        b.style.opacity = '0.6';
+        wf.appendChild(b);
+        bars.push({ el: b, base: h });
+    });
+    clearInterval(_waveInterval);
+    _waveInterval = setInterval(function() {
+        bars.forEach(function(b) {
+            var jitter = b.base * 0.4;
+            var newH = b.base + (Math.random() - 0.5) * jitter * 2;
+            b.el.style.height = Math.max(4, newH) + 'px';
+        });
+    }, 120);
+
+    document.getElementById('artist-modal-overlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+    document.getElementById('artist-modal-overlay').classList.remove('open');
+    document.body.style.overflow = '';
+    clearInterval(_waveInterval);
+}
+
+function modalLike() {
+    if (!_currentArtist) return;
+    window.likeArtist(_currentArtist.name, _currentArtist.emoji);
+    var likeBtn = document.getElementById('modal-like-btn');
+    likeBtn.textContent = '❤ Liked';
+    likeBtn.style.background = 'rgba(244,163,0,0.15)';
+    likeBtn.style.border = '1px solid var(--gold)';
+    likeBtn.style.color = 'var(--gold)';
+}
+
+// Keyboard close
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeModal();
+});
+</script>
+
+
+<script>
+// ── WAVEFORM STREAM TOGGLE ──
+var _streamIntervals = {};
+var _streamPlaying   = {};
+
+function toggleStream(name, btn) {
+    if (_streamPlaying[name]) {
+        // Stop
+        clearInterval(_streamIntervals[name]);
+        _streamPlaying[name] = false;
+        btn.textContent = '▶ Stream';
+        btn.classList.remove('btn-stream-active');
+        var wf = document.getElementById('wf-' + name);
+        if (wf) wf.classList.remove('playing');
+    } else {
+        // Stop any other playing
+        Object.keys(_streamPlaying).forEach(function(n) {
+            if (_streamPlaying[n]) {
+                clearInterval(_streamIntervals[n]);
+                _streamPlaying[n] = false;
+                var ob = document.getElementById('sbtn-' + n);
+                if (ob) { ob.textContent = '▶ Stream'; ob.classList.remove('btn-stream-active'); }
+                var owf = document.getElementById('wf-' + n);
+                if (owf) owf.classList.remove('playing');
+            }
+        });
+
+        _streamPlaying[name] = true;
+        btn.textContent = '⏹ Stop';
+        btn.classList.add('btn-stream-active');
+
+        // Build waveform bars
+        var wf = document.getElementById('wf-' + name);
+        if (wf) {
+            wf.innerHTML = '';
+            var barHeights = [8,14,6,20,10,18,4,16,12,20,8,14,18,6,20,10,14,8,16,12,18,6,20,10,14];
+            var bars = [];
+            barHeights.forEach(function(h) {
+                var b = document.createElement('div');
+                b.className = 'card-waveform-bar';
+                b.style.height = h + 'px';
+                wf.appendChild(b);
+                bars.push({ el: b, base: h });
+            });
+            wf.classList.add('playing');
+            _streamIntervals[name] = setInterval(function() {
+                bars.forEach(function(b) {
+                    var jitter = b.base * 0.6;
+                    var newH = b.base + (Math.random() - 0.5) * jitter * 2;
+                    b.el.style.height = Math.max(3, newH) + 'px';
+                });
+            }, 100);
+        }
+    }
+}
+</script>
+
+<script src="liked-artists.js"></script>
+</body>
+</html>

@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>BeeMusic | Genre</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&display=swap">
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <style>
+      #react-toast-root { position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+      .bee-toast { background: #161616; border: 1px solid #2a2a2a; border-left: 3px solid #f4a300; border-radius: 8px; padding: 14px 18px; font-family: 'DM Sans', sans-serif; font-size: 13px; color: #f0f0f0; min-width: 240px; max-width: 300px; pointer-events: all; animation: toastIn 0.3s ease; cursor: pointer; }
+      @keyframes toastIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+      .bee-toast-title { font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: #f4a300; margin-bottom: 4px; font-weight: 600; }
+
+      .genre-hero {
+        padding: 56px 48px 40px;
+        border-bottom: 1px solid var(--border);
+        background: radial-gradient(ellipse at 60% 0%, rgba(244,163,0,0.08) 0%, transparent 60%);
+        position: relative;
+        overflow: hidden;
+      }
+      .genre-hero-bg {
+        position: absolute; inset: 0;
+        background: conic-gradient(from 180deg at 80% 60%, transparent 0deg, rgba(244,163,0,0.04) 20deg, transparent 40deg, rgba(244,163,0,0.03) 60deg, transparent 80deg);
+        pointer-events: none;
+      }
+      .genre-back {
+        display: inline-flex; align-items: center; gap: 8px;
+        font-size: 13px; color: var(--text-muted); text-decoration: none;
+        font-family: 'DM Sans', sans-serif;
+        margin-bottom: 24px;
+        transition: color 0.2s;
+      }
+      .genre-back:hover { color: var(--gold); }
+      .genre-tag-pill {
+        display: inline-block;
+        background: rgba(244,163,0,0.12);
+        border: 1px solid rgba(244,163,0,0.3);
+        color: var(--gold);
+        font-size: 11px; font-weight: 600; letter-spacing: 2px;
+        text-transform: uppercase;
+        padding: 4px 14px; border-radius: 20px;
+        font-family: 'DM Sans', sans-serif;
+        margin-bottom: 16px;
+      }
+      .genre-title {
+        font-family: 'ClashDisplay-Variable','Clash Display',sans-serif;
+        font-size: clamp(36px, 5vw, 64px);
+        font-weight: 700; color: var(--text);
+        margin: 0 0 10px; line-height: 1.05;
+      }
+      .genre-subtitle {
+        font-size: 14px; color: var(--text-muted);
+        font-family: 'DM Sans', sans-serif; margin: 0;
+        max-width: 480px; line-height: 1.7;
+      }
+      .genre-stats-row {
+        display: flex; gap: 32px; margin-top: 28px; flex-wrap: wrap;
+      }
+      .genre-stat {
+        display: flex; flex-direction: column; gap: 2px;
+      }
+      .genre-stat-val {
+        font-family: 'ClashDisplay-Variable','Clash Display',sans-serif;
+        font-size: 24px; font-weight: 700; color: var(--text);
+      }
+      .genre-stat-lbl {
+        font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase;
+        color: var(--text-muted); font-family: 'DM Sans',sans-serif;
+      }
+      .genre-stat-div { width: 1px; background: var(--border); align-self: stretch; }
+
+      /* artist grid */
+      .genre-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 16px;
+        padding: 40px 48px;
+      }
+      .genre-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 24px;
+        display: flex; flex-direction: column; gap: 12px;
+        transition: border-color 0.2s, transform 0.2s;
+        animation: cardIn 0.4s cubic-bezier(0.22,1,0.36,1) both;
+        cursor: pointer;
+      }
+      @keyframes cardIn {
+        from { opacity: 0; transform: translateY(16px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+      .genre-card:hover { border-color: var(--gold); transform: translateY(-3px); }
+      .genre-card-avatar {
+        width: 56px; height: 56px; border-radius: 50%;
+        background: linear-gradient(135deg,#2a1f00,#f4a300);
+        display: flex; align-items: center; justify-content: center; font-size: 26px;
+      }
+      .genre-card-name {
+        font-family: 'ClashDisplay-Variable','Clash Display',sans-serif;
+        font-size: 18px; font-weight: 700; color: var(--text);
+      }
+      .genre-card-meta { font-size: 13px; color: var(--text-muted); }
+      .genre-card-streams {
+        font-family: 'ClashDisplay-Variable','Clash Display',sans-serif;
+        font-size: 22px; font-weight: 700; color: var(--gold);
+      }
+      .genre-card-streams small {
+        font-family: 'DM Sans',sans-serif; font-size: 11px;
+        color: var(--text-muted); font-weight: 400; margin-left: 4px;
+      }
+      .genre-card-footer {
+        display: flex; gap: 8px; padding-top: 12px; border-top: 1px solid var(--border);
+        margin-top: auto;
+      }
+      .genre-card-footer button {
+        flex: 1; font-size: 12px; padding: 7px 0;
+      }
+      .gcf-secondary {
+        background: transparent !important;
+        border: 1px solid var(--border) !important;
+        color: var(--text-muted) !important;
+      }
+      .gcf-secondary:hover {
+        border-color: var(--gold) !important;
+        color: var(--text) !important;
+        background: transparent !important;
+      }
+      .genre-empty {
+        grid-column: 1/-1; text-align: center;
+        padding: 80px 40px;
+      }
+      .genre-empty h3 {
+        font-family: 'ClashDisplay-Variable','Clash Display',sans-serif;
+        font-size: 24px; color: var(--text-muted); margin-bottom: 12px;
+      }
+      .genre-empty p { font-size: 14px; color: #444; }
+
+      /* related genres */
+      .related-section {
+        padding: 0 48px 48px;
+        border-top: 1px solid var(--border);
+        padding-top: 32px;
+      }
+      .related-title {
+        font-size: 11px; letter-spacing: 3px; text-transform: uppercase;
+        color: var(--gold); font-family: 'DM Sans',sans-serif; font-weight: 600;
+        margin-bottom: 16px;
+      }
+      .related-chips { display: flex; gap: 8px; flex-wrap: wrap; }
+      .related-chip {
+        background: var(--bg-card); border: 1px solid var(--border);
+        color: var(--text-muted); padding: 7px 16px; border-radius: 20px;
+        font-size: 13px; font-family: 'DM Sans',sans-serif;
+        cursor: pointer; text-decoration: none;
+        transition: all 0.2s; display: inline-block;
+      }
+      .related-chip:hover { border-color: var(--gold); color: var(--gold); }
+    </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+    <a href="home.html" class="nav-logo"><img src="logo.png" alt="Bee Music Logo" class="nav-logo-img">BEE MUSIC</a>
+    <p class="nav-links">
+        <a href="home.html">Home</a>
+        <a href="artists.html" class="active">Artists</a>
+        <a href="upload.html">Upload</a>
+        <a href="contact.html">Contact</a>
+    </p>
+</nav>
+
+<marquee>GENRE EXPLORER &nbsp;&nbsp;&nbsp;✦&nbsp;&nbsp;&nbsp; FILTER BY SOUND &nbsp;&nbsp;&nbsp;✦&nbsp;&nbsp;&nbsp; STREAM • DISCOVER • SUPPORT &nbsp;&nbsp;&nbsp;✦&nbsp;&nbsp;&nbsp; BEEMUSIC.IN</marquee>
+
+<!-- GENRE HERO -->
+<div class="genre-hero">
+    <div class="genre-hero-bg"></div>
+    <a href="artists.html" class="genre-back">← Back to all artists</a>
+    <div class="genre-tag-pill" id="genreTag">Genre</div>
+    <h1 class="genre-title" id="genreTitle">Loading...</h1>
+    <p class="genre-subtitle" id="genreSubtitle"></p>
+    <div class="genre-stats-row">
+        <div class="genre-stat">
+            <div class="genre-stat-val" id="statArtists">—</div>
+            <div class="genre-stat-lbl">Artists</div>
+        </div>
+        <div class="genre-stat-div"></div>
+        <div class="genre-stat">
+            <div class="genre-stat-val" id="statStreams">—</div>
+            <div class="genre-stat-lbl">Total Streams</div>
+        </div>
+        <div class="genre-stat-div"></div>
+        <div class="genre-stat">
+            <div class="genre-stat-val" id="statAvgYrs">—</div>
+            <div class="genre-stat-lbl">Avg Experience</div>
+        </div>
+    </div>
+</div>
+
+<!-- ARTIST GRID -->
+<div class="genre-grid" id="genreGrid"></div>
+
+<!-- RELATED GENRES -->
+<div class="related-section">
+    <div class="related-title">Explore Other Genres</div>
+    <div class="related-chips" id="relatedChips"></div>
+</div>
+
+<!-- FOOTER -->
+<div class="site-footer">
+    <div class="site-footer-left">
+        <div class="footer-logo"><img src="logo.png" alt="Bee Music Logo" class="footer-logo-img">BEE MUSIC</div>
+        <p>© 2025–26 BEE MUSIC. All rights reserved.</p>
+        <p style="margin-top:4px;font-size:11px;color:#444;">Web Programming Laboratory · Siddhartha Gupta · 24BCE5063</p>
+    </div>
+    <div class="site-footer-center">
+        <a href="home.html">Home</a>
+        <a href="artists.html">Artists</a>
+        <a href="upload.html">Upload</a>
+        <a href="contact.html">Contact</a>
+    </div>
+</div>
+
+<div id="react-toast-root"></div>
+
+<script>
+const ARTISTS = [
+    { name:"Rahul",   emoji:"🎻", genre:"Classical Fusion", lang:"Tamil",    yrs:3, streams:18200,  trend:12 },
+    { name:"Ananya",  emoji:"🎵", genre:"Indie",            lang:"English",  yrs:2, streams:12500,  trend:8  },
+    { name:"Meera",   emoji:"🎤", genre:"Pop",              lang:"Hindi",    yrs:1, streams:9800,   trend:21 },
+    { name:"Karthik", emoji:"🎼", genre:"Melody",           lang:"Tamil",    yrs:2, streams:7400,   trend:5  },
+    { name:"Neha",    emoji:"🪕", genre:"Acoustic",         lang:"English",  yrs:1, streams:6950,   trend:3  },
+    { name:"Priya",   emoji:"🎹", genre:"Carnatic",         lang:"Telugu",   yrs:4, streams:23100,  trend:18 },
+    { name:"Arjun",   emoji:"🎸", genre:"Rock Fusion",      lang:"Hindi",    yrs:5, streams:31400,  trend:7  },
+    { name:"Divya",   emoji:"🎙️", genre:"Sufi",             lang:"Urdu",     yrs:3, streams:15600,  trend:14 },
+    { name:"Vikram",  emoji:"🥁", genre:"Fusion Jazz",      lang:"Tamil",    yrs:6, streams:28900,  trend:9  },
+    { name:"Sana",    emoji:"🎵", genre:"Ghazal",           lang:"Hindi",    yrs:2, streams:11200,  trend:25 },
+    { name:"Rohan",   emoji:"🎸", genre:"Indie Rock",       lang:"English",  yrs:3, streams:19700,  trend:11 },
+    { name:"Lakshmi", emoji:"🎤", genre:"Devotional",       lang:"Sanskrit", yrs:7, streams:34500,  trend:4  },
+];
+
+const GENRE_DESC = {
+    "Classical Fusion":  "Where ancient ragas meet contemporary production. A bridge between tradition and tomorrow.",
+    "Indie":             "Independent spirit, unfiltered sound. Artists charting their own course.",
+    "Pop":               "Melodic hooks and universal emotions. Music that moves the mainstream.",
+    "Melody":            "Pure, soulful melodies that linger long after the last note fades.",
+    "Acoustic":          "Raw and stripped back. Just the artist, the instrument, and the truth.",
+    "Carnatic":          "South India's classical treasure — intricate ragas, precise rhythms, deep devotion.",
+    "Rock Fusion":       "Guitar-driven energy infused with Indian rhythms and vocal power.",
+    "Sufi":              "Mystical poetry set to music. A journey inward through sound.",
+    "Fusion Jazz":       "Improvisation meets Indian classical. Spontaneous, sophisticated, sublime.",
+    "Ghazal":            "Urdu poetry's most intimate form — longing, love, and loss in every couplet.",
+    "Indie Rock":        "Alternative energy with independent ethos. Distortion meets soul.",
+    "Devotional":        "Sacred music that transcends religion. Songs that touch the divine.",
+};
+
+const params = new URLSearchParams(window.location.search);
+const genre  = params.get('genre') || 'Indie';
+const filtered = ARTISTS.filter(a => a.genre === genre);
+const allGenres = [...new Set(ARTISTS.map(a => a.genre))];
+
+// Update hero
+document.title = 'BeeMusic | ' + genre;
+document.getElementById('genreTag').textContent = genre;
+document.getElementById('genreTitle').textContent = genre;
+document.getElementById('genreSubtitle').textContent = GENRE_DESC[genre] || 'Discover artists in this genre.';
+
+if (filtered.length) {
+    const totalStreams = filtered.reduce((s,a) => s + a.streams, 0);
+    const avgYrs = (filtered.reduce((s,a) => s + a.yrs, 0) / filtered.length).toFixed(1);
+    document.getElementById('statArtists').textContent  = filtered.length;
+    document.getElementById('statStreams').textContent  = (totalStreams / 1000).toFixed(1) + 'K';
+    document.getElementById('statAvgYrs').textContent   = avgYrs + ' yrs';
+}
+
+// Render cards
+const grid = document.getElementById('genreGrid');
+if (!filtered.length) {
+    grid.innerHTML = '<div class="genre-empty"><h3>No artists yet</h3><p>Be the first to upload in this genre.</p></div>';
+} else {
+    filtered.forEach((a, i) => {
+        const trendColor = a.trend >= 10 ? '#4ade80' : a.trend >= 5 ? '#f4a300' : '#888';
+        const card = document.createElement('div');
+        card.className = 'genre-card';
+        card.style.animationDelay = (i * 0.07) + 's';
+        card.innerHTML = `
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+                <div class="genre-card-avatar">${a.emoji}</div>
+                <span style="font-size:11px;color:${trendColor};font-weight:600;background:rgba(255,255,255,0.05);padding:3px 8px;border-radius:20px;">+${a.trend}%</span>
+            </div>
+            <div>
+                <div class="genre-card-name">${a.name}</div>
+                <div style="font-size:12px;color:var(--text-muted);margin-top:2px;">${a.lang} · ${a.yrs} yr${a.yrs>1?'s':''}</div>
+            </div>
+            <div class="genre-card-streams">${a.streams.toLocaleString()} <small>streams</small></div>
+            <div class="genre-card-footer">
+                <button onclick="window.likeArtist('${a.name}','${a.emoji}')">❤ Like</button>
+                <button class="gcf-secondary">▶ Stream</button>
+            </div>`;
+        grid.appendChild(card);
+    });
+}
+
+// Related genres
+const chips = document.getElementById('relatedChips');
+allGenres.filter(g => g !== genre).forEach(g => {
+    const a = document.createElement('a');
+    a.className = 'related-chip';
+    a.href = 'genre.html?genre=' + encodeURIComponent(g);
+    a.textContent = g;
+    chips.appendChild(a);
+});
+
+// Toast
+(function() {
+    const { useState, useEffect, useCallback } = React;
+    function Toast({ title, msg, onRemove }) {
+        useEffect(() => { const t = setTimeout(onRemove, 3800); return () => clearTimeout(t); }, []);
+        return React.createElement('div', { className:'bee-toast', onClick:onRemove },
+            React.createElement('div', { className:'bee-toast-title' }, title),
+            React.createElement('div', null, msg));
+    }
+    function TC() {
+        const [toasts, setToasts] = useState([]);
+        const remove = useCallback(id => setToasts(t => t.filter(x => x.id !== id)), []);
+        return React.createElement('div', null, toasts.map(t =>
+            React.createElement(Toast, { key:t.id, title:t.title, msg:t.msg, onRemove:() => remove(t.id) })));
+    }
+    ReactDOM.createRoot(document.getElementById('react-toast-root')).render(React.createElement(TC));
+})();
+</script>
+<script src="liked-artists.js"></script>
+</body>
+</html>

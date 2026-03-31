@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>BeeMusic | Contact</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&display=swap">
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <style>
+      #react-toast-root { position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+      .bee-toast { background: #161616; border: 1px solid #2a2a2a; border-left: 3px solid #f4a300; border-radius: 8px; padding: 14px 18px; font-family: 'DM Sans', sans-serif; font-size: 13px; color: #f0f0f0; min-width: 240px; max-width: 300px; pointer-events: all; animation: toastIn 0.3s ease; cursor: pointer; }
+      @keyframes toastIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+      .bee-toast-title { font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: #f4a300; margin-bottom: 4px; font-weight: 600; }
+    </style>
+    <style>
+        .contact-layout {
+            display: grid;
+            grid-template-columns: 1fr 1.4fr;
+            gap: 24px;
+            margin: 32px 40px;
+            align-items: start;
+        }
+
+        /* ── LEFT PANEL ── */
+        .contact-info {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .info-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 24px;
+        }
+
+        .info-card.grow {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .info-card.grow .social-links-v2 {
+            flex: 1;
+            justify-content: space-between;
+        }
+
+        .info-card h3 {
+            font-family: 'ClashDisplay-Variable', 'Clash Display', sans-serif;
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            margin-bottom: 16px;
+        }
+
+        .contact-item:last-child { margin-bottom: 0; }
+
+        .contact-icon {
+            width: 36px;
+            height: 36px;
+            background: rgba(244,163,0,0.1);
+            border: 1px solid rgba(244,163,0,0.2);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .contact-item-text label {
+            display: block;
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 3px;
+            font-family: 'DM Sans', sans-serif;
+        }
+
+        .contact-item-text a,
+        .contact-item-text p {
+            color: var(--text);
+            font-size: 14px;
+            text-decoration: none;
+            margin: 0;
+        }
+
+        .contact-item-text a:hover { color: var(--gold); }
+
+        /* Socials */
+        .social-links {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .social-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--bg-card2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 9px 16px;
+            font-size: 13px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-family: 'DM Sans', sans-serif;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .social-btn:hover {
+            border-color: var(--gold);
+            color: var(--gold);
+            background: rgba(244,163,0,0.06);
+        }
+
+        /* ── RIGHT PANEL — FORM ── */
+        .contact-form-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 32px;
+
+        }
+
+        .contact-form-card h2 {
+            font-family: 'ClashDisplay-Variable', 'Clash Display', sans-serif;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text);
+            margin: 0 0 24px 0;
+            padding: 0 0 16px 0;
+            border: none;
+            border-bottom: 1px solid var(--border);
+            background: none;
+        }
+
+        .contact-form-card h2::before { content: none; }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 7px;
+            font-family: 'DM Sans', sans-serif;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            padding: 10px 14px;
+            font-size: 14px;
+            font-family: 'DM Sans', sans-serif;
+            outline: none;
+            transition: border-color 0.2s;
+            box-sizing: border-box;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: var(--gold);
+            background: #111;
+        }
+
+        .form-group input::placeholder,
+        .form-group textarea::placeholder {
+            color: var(--text-muted);
+        }
+
+        select option { background: #1e1e1e; color: var(--text); }
+
+        textarea { resize: vertical; }
+
+        .submit-row {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-top: 8px;
+        }
+
+        #formSuccess {
+            display: none;
+            color: #4caf50;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        /* ── MAP ── */
+        .map-section {
+            margin: 0 40px 40px;
+        }
+
+        .map-section h2 {
+            font-family: 'ClashDisplay-Variable', 'Clash Display', sans-serif;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text);
+            margin: 0 0 20px 0;
+            padding: 0 0 14px 0;
+            border: none;
+            border-bottom: 1px solid var(--border);
+            background: none;
+        }
+
+        .map-section h2::before { content: none; }
+
+        .map-wrapper {
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            position: relative;
+        }
+
+        .map-wrapper iframe {
+            display: block;
+            width: 100%;
+            height: 340px;
+            filter: grayscale(1) invert(1) brightness(0.85) contrast(0.9);
+        }
+
+        .map-pin-overlay {
+            position: absolute;
+            bottom: 16px;
+            left: 16px;
+            background: rgba(13,13,13,0.92);
+            border: 1px solid var(--gold);
+            border-radius: 8px;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            backdrop-filter: blur(8px);
+        }
+
+        .map-pin-overlay .pin-icon { font-size: 20px; }
+
+        .map-pin-overlay p {
+            margin: 0;
+            font-size: 13px;
+            color: var(--text);
+            font-family: 'DM Sans', sans-serif;
+        }
+
+        .map-pin-overlay p small {
+            color: var(--text-muted);
+            font-size: 11px;
+            display: block;
+            margin-top: 2px;
+        }
+
+        /* ── FAQ ── */
+        .faq-section {
+            margin: 0 40px 40px;
+        }
+
+        .faq-section h2 {
+            font-family: 'ClashDisplay-Variable', 'Clash Display', sans-serif;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text);
+            margin: 0 0 20px 0;
+            padding: 0 0 14px 0;
+            border: none;
+            border-bottom: 1px solid var(--border);
+            background: none;
+        }
+
+        .faq-section h2::before { content: none; }
+
+        .faq-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .faq-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .faq-question {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px;
+            cursor: pointer;
+            font-family: 'ClashDisplay-Variable', 'Clash Display', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text);
+            gap: 12px;
+            transition: background 0.2s;
+            user-select: none;
+        }
+
+        .faq-question:hover { background: var(--bg-card2); }
+
+        .faq-arrow {
+            color: var(--gold);
+            font-size: 18px;
+            flex-shrink: 0;
+            transition: transform 0.25s;
+        }
+
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease, padding 0.3s ease;
+            font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.7;
+            padding: 0 20px;
+        }
+
+        .faq-item.open .faq-answer {
+            max-height: 200px;
+            padding: 0 20px 16px;
+        }
+
+        .faq-item.open .faq-arrow {
+            transform: rotate(45deg);
+        }
+
+        .faq-item.open {
+            border-color: rgba(244,163,0,0.3);
+        }
+
+        @media (max-width: 720px) {
+            .contact-layout { grid-template-columns: 1fr; }
+            .faq-grid { grid-template-columns: 1fr; }
+            .form-row { grid-template-columns: 1fr; }
+        }
+    
+        /* ── SOCIAL LINKS V2 ── */
+        .social-links-v2 {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .social-pill {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 16px;
+            border-radius: 10px;
+            text-decoration: none;
+            border: 1px solid var(--border);
+            background: var(--bg);
+            transition: transform 0.2s, border-color 0.2s, background 0.2s, box-shadow 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .social-pill::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            transition: opacity 0.25s;
+        }
+
+        .social-pill:hover {
+            transform: translateX(4px);
+            box-shadow: -3px 0 0 0 currentColor, 0 4px 16px rgba(0,0,0,0.3);
+        }
+
+        .social-pill.tiktok { color: #fff; }
+        .social-pill.tiktok::before { background: linear-gradient(90deg, rgba(255,255,255,0.05) 0%, transparent 100%); }
+        .social-pill.tiktok:hover { border-color: #fff; background: rgba(255,255,255,0.04); }
+
+        .social-pill.instagram { color: #e1306c; }
+        .social-pill.instagram::before { background: linear-gradient(90deg, rgba(225,48,108,0.06) 0%, transparent 100%); }
+        .social-pill.instagram:hover { border-color: #e1306c; background: rgba(225,48,108,0.04); box-shadow: -3px 0 0 0 #e1306c, 0 4px 16px rgba(0,0,0,0.3); }
+
+        .social-pill.twitter { color: #f0f0f0; }
+        .social-pill.twitter:hover { border-color: #f0f0f0; background: rgba(240,240,240,0.04); }
+
+        .social-pill.youtube { color: #ff0000; }
+        .social-pill.youtube::before { background: linear-gradient(90deg, rgba(255,0,0,0.06) 0%, transparent 100%); }
+        .social-pill.youtube:hover { border-color: #ff0000; background: rgba(255,0,0,0.04); box-shadow: -3px 0 0 0 #ff0000, 0 4px 16px rgba(0,0,0,0.3); }
+
+        .social-pill.linkedin { color: #0a66c2; }
+        .social-pill.linkedin::before { background: linear-gradient(90deg, rgba(10,102,194,0.08) 0%, transparent 100%); }
+        .social-pill.linkedin:hover { border-color: #0a66c2; background: rgba(10,102,194,0.04); box-shadow: -3px 0 0 0 #0a66c2, 0 4px 16px rgba(0,0,0,0.3); }
+
+        .sp-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .sp-icon svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .sp-label {
+            font-family: 'DM Sans', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text);
+            flex: 1;
+        }
+
+        .sp-handle {
+            font-family: 'DM Sans', sans-serif;
+            font-size: 12px;
+            color: var(--text-muted);
+            flex-shrink: 0;
+        }
+
+        /* ── SOCIAL ICON BUTTONS (right panel row) ── */
+        .soc-icon-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            background: var(--bg-card2);
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            transition: transform 0.18s, border-color 0.18s, background 0.18s;
+            flex-shrink: 0;
+        }
+        .soc-icon-btn svg { width: 18px; height: 18px; }
+        .soc-icon-btn:hover { transform: translateY(-3px); }
+        .soc-icon-btn.tiktok svg { fill: #fff; }
+        .soc-icon-btn.tiktok:hover { border-color: #fff; background: rgba(255,255,255,0.06); }
+        .soc-icon-btn.instagram svg { fill: #e1306c; }
+        .soc-icon-btn.instagram:hover { border-color: #e1306c; background: rgba(225,48,108,0.08); }
+        .soc-icon-btn.twitter svg { fill: #f0f0f0; }
+        .soc-icon-btn.twitter:hover { border-color: #f0f0f0; background: rgba(240,240,240,0.06); }
+        .soc-icon-btn.youtube svg { fill: #ff0000; }
+        .soc-icon-btn.youtube:hover { border-color: #ff0000; background: rgba(255,0,0,0.07); }
+        .soc-icon-btn.linkedin svg { fill: #0a66c2; }
+        .soc-icon-btn.linkedin:hover { border-color: #0a66c2; background: rgba(10,102,194,0.08); }
+
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+    <a href="home.html" class="nav-logo"><img src="logo.png" alt="Bee Music Logo" class="nav-logo-img">BEE MUSIC</a>
+    <p class="nav-links">
+        <a href="home.html">Home</a>
+        <a href="artists.html">Artists</a>
+        <a href="upload.html">Upload</a>
+        <a href="contact.html" class="active">Contact</a>
+    </p>
+    
+</nav>
+
+<marquee>🎵 GET IN TOUCH &nbsp;&nbsp;&nbsp;✦&nbsp;&nbsp;&nbsp; WE'D LOVE TO HEAR FROM YOU &nbsp;&nbsp;&nbsp;✦&nbsp;&nbsp;&nbsp; BEE MUSIC PLATFORM &nbsp;&nbsp;&nbsp;✦&nbsp;&nbsp;&nbsp; 🎵</marquee>
+
+<!-- PAGE HEADER -->
+<div style="padding: 40px 40px 0;">
+    <p style="font-size:11px;letter-spacing:3px;color:var(--gold);text-transform:uppercase;font-family:'DM Sans',sans-serif;font-weight:500;margin-bottom:10px;">Get In Touch</p>
+    <h1 style="font-family:'ClashDisplay-Variable','Clash Display',sans-serif;font-size:36px;font-weight:800;color:var(--text);margin-bottom:6px;">Contact Us</h1>
+    <p style="color:var(--text-muted);font-size:14px;margin-bottom:32px;">Have questions, feedback, or want to partner with us? We're here.</p>
+</div>
+
+<!-- CONTACT LAYOUT -->
+<div class="contact-layout">
+
+    <!-- LEFT: Info + Socials -->
+    <div class="contact-info">
+
+        <div class="info-card">
+            <h3>Contact Details</h3>
+
+            <div class="contact-item">
+                <div class="contact-icon">✉️</div>
+                <div class="contact-item-text">
+                    <label>Email</label>
+                    <a href="mailto:beemusic@gmail.com">beemusic@gmail.com</a>
+                </div>
+            </div>
+
+            <div class="contact-item">
+                <div class="contact-icon">📞</div>
+                <div class="contact-item-text">
+                    <label>Phone</label>
+                    <p>+91 98765 43210</p>
+                </div>
+            </div>
+
+            <div class="contact-item">
+                <div class="contact-icon">📍</div>
+                <div class="contact-item-text">
+                    <label>Location</label>
+                    <p>Chennai, Tamil Nadu, India</p>
+                </div>
+            </div>
+
+            <div class="contact-item">
+                <div class="contact-icon">🕐</div>
+                <div class="contact-item-text">
+                    <label>Response Time</label>
+                    <p>Within 24 hours</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- RIGHT: Quick contact info card -->
+    <div class="contact-form-card" style="display:flex;flex-direction:column;gap:12px;padding:20px;">
+        <h2 style="margin:0 0 4px;padding:0 0 12px;border:none;border-bottom:1px solid var(--border);font-size:18px;">Reach Out Directly</h2>
+        <p style="color:var(--text-muted);font-size:13px;line-height:1.6;margin:0;">Whether you're an artist looking to join, a listener with feedback, or a brand interested in partnering — we'd love to hear from you.</p>
+
+        <a href="mailto:beemusic@gmail.com" style="display:flex;align-items:center;gap:14px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:14px 18px;text-decoration:none;transition:border-color 0.2s;" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='var(--border)'">
+            <div style="width:38px;height:38px;background:rgba(244,163,0,0.1);border:1px solid rgba(244,163,0,0.2);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;">✉️</div>
+            <div>
+                <p style="margin:0;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);font-family:'DM Sans',sans-serif;font-weight:500;">Email Us</p>
+                <p style="margin:3px 0 0;font-size:13px;color:var(--gold);font-family:'DM Sans',sans-serif;">beemusic@gmail.com</p>
+            </div>
+        </a>
+
+        <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:14px 18px;">
+            <p style="margin:0 0 10px;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);font-family:'DM Sans',sans-serif;font-weight:500;">Office Hours</p>
+            <div style="display:flex;flex-direction:column;gap:7px;">
+                <div style="display:flex;justify-content:space-between;font-size:13px;"><span style="color:var(--text-muted);">Monday – Friday</span><span style="color:var(--text);">9:00 AM – 6:00 PM IST</span></div>
+                <div style="display:flex;justify-content:space-between;font-size:13px;"><span style="color:var(--text-muted);">Saturday</span><span style="color:var(--text);">10:00 AM – 3:00 PM IST</span></div>
+                <div style="display:flex;justify-content:space-between;font-size:13px;"><span style="color:var(--text-muted);">Sunday</span><span style="color:#555;">Closed</span></div>
+            </div>
+        </div>
+
+        <!-- Social icons row -->
+        <div style="margin-top:auto;padding-top:12px;border-top:1px solid var(--border);">
+            <p style="margin:0 0 12px;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);font-family:'DM Sans',sans-serif;font-weight:500;">Find Us On</p>
+            <div style="display:flex;gap:10px;align-items:center;">
+
+                <a href="#" target="_blank" class="soc-icon-btn tiktok" title="TikTok">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.78 1.52V6.76a4.85 4.85 0 0 1-1.01-.07z"/></svg>
+                </a>
+
+                <a href="#" target="_blank" class="soc-icon-btn instagram" title="Instagram">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg>
+                </a>
+
+                <a href="#" target="_blank" class="soc-icon-btn twitter" title="X / Twitter">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.737-8.835L1.254 2.25H8.08l4.259 5.63L18.244 2.25zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                </a>
+
+                <a href="#" target="_blank" class="soc-icon-btn youtube" title="YouTube">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                </a>
+
+                <a href="#" target="_blank" class="soc-icon-btn linkedin" title="LinkedIn">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+                </a>
+
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<!-- MAP -->
+<div class="map-section">
+    <h2>Find Us</h2>
+    <div class="map-wrapper">
+        <iframe
+            src="https://www.openstreetmap.org/export/embed.html?bbox=80.1,13.0,80.35,13.15&amp;layer=mapnik&amp;marker=13.0827,80.2707"
+            style="border:0;"
+            allowfullscreen=""
+            loading="lazy">
+        </iframe>
+        <div class="map-pin-overlay">
+            <span class="pin-icon">📍</span>
+            <p>BEE MUSIC HQ <small>Chennai, Tamil Nadu, India</small></p>
+        </div>
+    </div>
+</div>
+
+<!-- FAQ -->
+<div class="faq-section">
+    <h2>Frequently Asked Questions</h2>
+    <div class="faq-grid">
+
+        <div class="faq-item">
+            <div class="faq-question" onclick="toggleFaq(this)">
+                How do I upload my music?
+                <span class="faq-arrow">+</span>
+            </div>
+            <div class="faq-answer">
+                Head to the Upload page from the navigation bar. Fill in your artist details, select your genre and language, then attach your audio file and submit. Your track will be reviewed within 48 hours.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question" onclick="toggleFaq(this)">
+                Is BEE MUSIC free for artists?
+                <span class="faq-arrow">+</span>
+            </div>
+            <div class="faq-answer">
+                Yes — BEE MUSIC is completely free for independent artists to register and upload. We believe talent shouldn't be gated by fees. Our mission is to give every voice a platform.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question" onclick="toggleFaq(this)">
+                What audio formats are supported?
+                <span class="faq-arrow">+</span>
+            </div>
+            <div class="faq-answer">
+                We support MP3, WAV, FLAC, and AAC formats. For the best streaming quality, we recommend uploading in WAV or FLAC at 44.1 kHz / 16-bit or higher.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question" onclick="toggleFaq(this)">
+                How are featured artists selected?
+                <span class="faq-arrow">+</span>
+            </div>
+            <div class="faq-answer">
+                Our editorial team reviews stream counts, audience engagement, and overall track quality each month. The artist with the most consistent growth and listener interaction earns the Featured spot.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question" onclick="toggleFaq(this)">
+                Can listeners leave feedback?
+                <span class="faq-arrow">+</span>
+            </div>
+            <div class="faq-answer">
+                Absolutely. Listeners can like artists and tracks. We are actively building a full comments and rating system which will roll out in the next platform update.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question" onclick="toggleFaq(this)">
+                How do I report a technical issue?
+                <span class="faq-arrow">+</span>
+            </div>
+            <div class="faq-answer">
+                Use the contact form above, select "Report a Problem" as the subject, and describe the issue in detail. Our team typically responds within 24 hours on business days.
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div class="site-footer">
+    <div class="site-footer-left">
+        <div class="footer-logo"><img src="logo.png" alt="Bee Music Logo" class="footer-logo-img">BEE MUSIC</div>
+        <p>© 2025–26 BEE MUSIC. All rights reserved.</p>
+        <p style="margin-top:4px;font-size:11px;color:#444;">Web Programming Laboratory &nbsp;·&nbsp; Siddhartha Gupta &nbsp;·&nbsp; 24BCE5063</p>
+    </div>
+    <div class="site-footer-center">
+        <a href="home.html">Home</a>
+        <a href="artists.html">Artists</a>
+        <a href="upload.html">Upload</a>
+        <a href="contact.html">Contact</a>
+    </div>
+</div>
+
+<script>
+    function toggleFaq(el) {
+        var item = el.parentElement;
+        var isOpen = item.classList.contains('open');
+        document.querySelectorAll('.faq-item').forEach(function(i) {
+            i.classList.remove('open');
+        });
+        if (!isOpen) item.classList.add('open');
+    }
+
+    function sendMessage() {
+        var name = document.getElementById('firstName').value;
+        var email = document.getElementById('contactEmail').value;
+        var subject = document.getElementById('subject').value;
+        var message = document.getElementById('message').value;
+
+        if (!name || !email || !subject || !message) {
+            alert('Please fill in all fields before sending.');
+            return;
+        }
+
+        document.getElementById('formSuccess').style.display = 'inline';
+        document.getElementById('firstName').value = '';
+        document.getElementById('lastName').value = '';
+        document.getElementById('contactEmail').value = '';
+        document.getElementById('subject').value = '';
+        document.getElementById('message').value = '';
+
+        setTimeout(function() {
+            document.getElementById('formSuccess').style.display = 'none';
+        }, 5000);
+    }
+</script>
+<script src="liked-artists.js"></script>
+</body>
+</html>

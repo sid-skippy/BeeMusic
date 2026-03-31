@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>BeeMusic | Artist Studio</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&display=swap">
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <style>
+      #react-toast-root { position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+      .bee-toast { background: #161616; border: 1px solid #2a2a2a; border-left: 3px solid #f4a300; border-radius: 8px; padding: 14px 18px; font-family: 'DM Sans', sans-serif; font-size: 13px; color: #f0f0f0; min-width: 240px; max-width: 300px; pointer-events: all; animation: toastIn 0.3s ease; cursor: pointer; }
+      @keyframes toastIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+      .bee-toast-title { font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: #f4a300; margin-bottom: 4px; font-weight: 600; }
+    </style>
+    <style>
+        /* ── UPLOAD PAGE LAYOUT ── */
+        .studio-header {
+            padding: 40px 48px 32px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .studio-header h1 {
+            font-family: 'ClashDisplay-Variable', 'Clash Display', sans-serif;
+            font-size: 44px;
+            font-weight: 800;
+            color: var(--text);
+            margin: 0 0 8px;
+            padding: 0;
+            border: none;
+            background: none;
+            text-align: left;
+        }
+
+        .studio-header p {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin: 0;
+            max-width: 440px;
+            line-height: 1.6;
+        }
+
+        .studio-body {
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 20px;
+            padding: 28px 48px;
+            align-items: start;
+        }
+
+        /* ── LEFT COLUMN ── */
+        .studio-left {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* ── FORM CARD ── */
+        .form-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 28px;
+        }
+
+        .form-card-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: 'ClashDisplay-Variable', 'Clash Display', sans-serif;
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .form-card-title::before {
+            content: '';
+            width: 20px;
+            height: 2px;
+            background: var(--gold);
+            display: inline-block;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-group.full { grid-column: 1 / -1; }
+
+        .form-group label {
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            font-family: 'DM Sans', sans-serif;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text);
+            padding: 10px 14px;
+            font-size: 13px;
+            font-family: 'DM Sans', sans-serif;
+            outline: none;
+            transition: border-color 0.2s;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: var(--gold);
+        }
+
+        .form-group input::placeholder,
+        .form-group textarea::placeholder { color: #444; }
+
+        select option { background: #1e1e1e; color: var(--text); }
+        textarea { resize: vertical; }
+
+        .char-hint {
+            font-size: 11px;
+            color: var(--text-muted);
+            text-align: right;
+        }
+
+        .char-hint span { color: var(--gold); }
+
+        /* ── BOTTOM ROW (file drop + audio) ── */
+        .studio-bottom-row {
+            display: grid;
+            grid-template-columns: 1fr 1.4fr;
+            gap: 20px;
+        }
+
+        /* File drop zone */
+        .drop-zone {
+            background: var(--bg-card);
+            border: 1px dashed #333;
+            border-radius: 10px;
+            padding: 36px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: border-color 0.2s;
+            text-align: center;
+        }
+
+        .drop-zone:hover { border-color: var(--gold); }
+
+        .drop-zone-icon {
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .drop-zone-icon svg {
+            width: 22px; height: 22px;
+            stroke: var(--gold); fill: none;
+            stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round;
+        }
+
+        .drop-zone h4 {
+            font-family: 'ClashDisplay-Variable', 'Clash Display', sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text);
+            margin: 0;
+        }
+
+        .drop-zone p {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        .drop-zone input[type="file"] { display: none; }
+
+        .browse-btn {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            cursor: pointer;
+            font-family: 'DM Sans', sans-serif;
+            transition: all 0.2s;
+            margin-top: 4px;
+        }
+
+        .browse-btn:hover { border-color: var(--gold); color: var(--text); background: transparent; }
+
+        /* Audio player card */
+        .audio-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .audio-card h4 {
+            font-family: 'ClashDisplay-Variable', 'Clash Display', sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text);
+            margin: 0;
+            letter-spacing: 0.5px;
+        }
+
+        .audio-track-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .track-thumb {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #2a1f00, #f4a300);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .track-meta { flex: 1; }
+        .track-meta p { margin: 0; font-size: 13px; color: var(--text); font-weight: 500; }
+        .track-meta small { font-size: 11px; color: var(--text-muted); }
+
+        /* Waveform bars */
+        .waveform {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            height: 32px;
+        }
+
+        .waveform-bar {
+            width: 3px;
+            background: #333;
+            border-radius: 2px;
+            transition: background 0.2s;
+        }
+
+        .waveform-bar.active { background: var(--gold); }
+
+        .player-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .play-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--gold);
+            border: none;
+            color: #000;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            padding: 0;
+        }
+
+        .play-btn:hover { background: var(--gold-light); }
+
+        .progress-bar {
+            flex: 1;
+            height: 3px;
+            background: #333;
+            border-radius: 2px;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 33%;
+            background: var(--gold);
+            border-radius: 2px;
+        }
+
+        .time-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-family: 'DM Sans', sans-serif;
+            white-space: nowrap;
+        }
+
+        /* ── RIGHT COLUMN (stats) ── */
+        .studio-right {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .stats-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 24px;
+        }
+
+        .stats-card h3 {
+            font-family: 'ClashDisplay-Variable', 'Clash Display', sans-serif;
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text);
+            margin: 0 0 20px;
+            padding: 0;
+            border: none;
+        }
+
+        /* Storage bar */
+        .storage-block {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+
+        .storage-label {
+            font-size: 10px;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            font-family: 'DM Sans', sans-serif;
+            margin-bottom: 6px;
+        }
+
+        .storage-value {
+            font-family: 'ClashDisplay-Variable', 'Clash Display', sans-serif;
+            font-size: 26px;
+            font-weight: 800;
+            color: var(--text);
+            margin-bottom: 10px;
+        }
+
+        .storage-value span {
+            color: var(--gold);
+            font-size: 14px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        .storage-bar-track {
+            height: 4px;
+            background: #333;
+            border-radius: 2px;
+        }
+
+        .storage-bar-fill {
+            height: 100%;
+            width: 24%;
+            background: var(--gold);
+            border-radius: 2px;
+        }
+
+        /* Mini stats row */
+        .mini-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .mini-stat {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 14px;
+        }
+
+        .mini-stat svg {
+            width: 18px; height: 18px;
+            stroke: var(--text-muted); fill: none;
+            stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round;
+            margin-bottom: 6px; display: block;
+        }
+
+        .mini-stat .stat-val {
+            font-family: 'ClashDisplay-Variable', 'Clash Display', sans-serif;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 2px;
+        }
+
+        .mini-stat .stat-lbl {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        /* Recent activity */
+        .activity-label {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            font-family: 'DM Sans', sans-serif;
+            margin-bottom: 10px;
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .activity-item:last-child { border-bottom: none; }
+
+        .activity-dot {
+            width: 7px; height: 7px;
+            border-radius: 50%;
+            margin-right: 10px;
+            flex-shrink: 0;
+        }
+
+        .dot-green { background: #4caf50; }
+        .dot-amber { background: var(--gold); }
+
+        .activity-name {
+            font-size: 13px;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 0;
+        }
+
+        .activity-status {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* Launch card */
+        .launch-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 24px;
+        }
+
+        .launch-card h3 {
+            font-family: 'ClashDisplay-Variable', 'Clash Display', sans-serif;
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text);
+            margin: 0 0 8px;
+            padding: 0;
+            border: none;
+        }
+
+        .launch-card p {
+            font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.6;
+            margin: 0 0 20px;
+        }
+
+        .upload-btn {
+            width: 100%;
+            background: var(--gold);
+            border: none;
+            color: #000;
+            font-family: 'ClashDisplay-Variable', 'Clash Display', sans-serif;
+            font-size: 13px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            padding: 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .upload-btn:hover { background: var(--gold-light); }
+
+        .upload-terms {
+            font-size: 11px;
+            color: var(--text-muted);
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .upload-terms a {
+            color: var(--gold);
+            text-decoration: none;
+        }
+
+        /* Upload count badge */
+        .upload-count-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 8px 16px;
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+
+        .upload-count-badge strong {
+            color: var(--gold);
+            font-family: 'ClashDisplay-Variable', 'Clash Display', sans-serif;
+            font-size: 16px;
+        }
+
+        /* ── SITE FOOTER ── */
+        .site-footer {
+            background: #0a0a0a;
+            border-top: 1px solid var(--border);
+            padding: 28px 48px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .footer-logo {
+            font-family: 'ClashDisplay-Variable', 'Clash Display', sans-serif;
+            font-size: 15px;
+            font-weight: 800;
+            color: var(--gold);
+            margin-bottom: 6px;
+        }
+
+        .site-footer-left p { font-size: 12px; color: var(--text-muted); margin: 0; line-height: 1.7; }
+
+        .site-footer-center { display: flex; gap: 28px; }
+
+        .site-footer-center a {
+            font-size: 13px; color: var(--text-muted); text-decoration: none; transition: color 0.2s;
+        }
+
+        .site-footer-center a:hover { color: var(--text); }
+@media (max-width: 900px) {
+            .studio-body { grid-template-columns: 1fr; }
+            .studio-bottom-row { grid-template-columns: 1fr; }
+            .form-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+    <a href="home.html" class="nav-logo"><img src="logo.png" alt="Bee Music Logo" class="nav-logo-img">BEE MUSIC</a>
+    <p class="nav-links">
+        <a href="home.html">Home</a>
+        <a href="artists.html">Artists</a>
+        <a href="upload.html" class="active">Upload</a>
+        <a href="contact.html">Contact</a>
+    </p>
+    
+</nav>
+
+<marquee>ARTIST STUDIO &nbsp;&nbsp;&nbsp;✦&nbsp;&nbsp;&nbsp; UPLOAD YOUR MUSIC &nbsp;&nbsp;&nbsp;✦&nbsp;&nbsp;&nbsp; REACH LISTENERS WORLDWIDE &nbsp;&nbsp;&nbsp;✦&nbsp;&nbsp;&nbsp; BEEMUSIC.IN</marquee>
+
+<!-- STUDIO HEADER -->
+<div class="studio-header">
+    <h1>Artist Studio</h1>
+    <p>Shape your sound, share your soul. Professional mastering tools and global distribution at your fingertips.</p>
+</div>
+
+<!-- STUDIO BODY -->
+<div class="studio-body">
+
+    <!-- LEFT -->
+    <div class="studio-left">
+
+        <!-- ARTIST DETAILS FORM -->
+        <div class="form-card">
+            <div class="form-card-title">Artist Details</div>
+            <form id="uploadForm" onsubmit="return submitForm()">
+                <div class="form-progress-label">
+                    <span>Form completion</span>
+                    <span id="progressPct">0%</span>
+                </div>
+                <div class="form-progress-bar">
+                    <div class="form-progress-fill" id="formProgressFill"></div>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Artist Name</label>
+                        <input type="text" id="artistName" placeholder="Enter stage name" required oninput="validateField(this)">
+                        <span class="field-check" id="chk-artistName"></span>
+                        <div class="field-hint" id="hint-artistName"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Email Address</label>
+                        <input type="email" id="email" placeholder="contact@artist.com" required oninput="validateField(this)">
+                        <span class="field-check" id="chk-email"></span>
+                        <div class="field-hint" id="hint-email"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Primary Genre</label>
+                        <select id="genre" required onchange="validateField(this)">
+                            <option value="">Select Genre</option>
+                            <option>Pop</option>
+                            <option>Indie</option>
+                            <option>Classical Fusion</option>
+                            <option>Melody</option>
+                            <option>Acoustic</option>
+                            <option>Rock</option>
+                            <option>Jazz</option>
+                        </select>
+                        <span class="field-check" id="chk-genre"></span>
+                        <div class="field-hint" id="hint-genre"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Performance Language</label>
+                        <input type="text" id="language" placeholder="e.g. English, French" oninput="validateField(this)">
+                        <span class="field-check" id="chk-language"></span>
+                        <div class="field-hint" id="hint-language"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Experience Level</label>
+                        <input type="text" id="experience" placeholder="e.g. 5 Years" required oninput="validateField(this)">
+                        <span class="field-check" id="chk-experience"></span>
+                        <div class="field-hint" id="hint-experience"></div>
+                    </div>
+                    <div class="form-group full">
+                        <label>About the Artist <span id="charCount" style="float:right;color:var(--gold);font-weight:600;">0</span> / 500 characters</label>
+                        <textarea id="about" oninput="validateField(this)" rows="5" maxlength="500" placeholder="Share your story, influences, and musical journey..." required></textarea>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- BOTTOM ROW -->
+        <div class="studio-bottom-row">
+
+            <!-- FILE DROP -->
+            <div class="drop-zone" onclick="document.getElementById('audioFile').click()">
+                <div class="drop-zone-icon">
+                    <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                </div>
+                <h4>Master Audio Track</h4>
+                <p>Drag &amp; drop your .WAV or .FLAC file here</p>
+                <button class="browse-btn" type="button">Browse Files</button>
+                <input type="file" id="audioFile" accept="audio/*">
+            </div>
+
+            <!-- AUDIO PLAYER -->
+            <div class="audio-card">
+                <h4>Sample Audio</h4>
+                <div class="audio-track-info">
+                    <div class="track-thumb">🎵</div>
+                    <div class="track-meta">
+                        <p>audio.mp3</p>
+                        <small id="audioDuration">Preview · loading...</small>
+                    </div>
+                </div>
+                <div class="waveform" id="waveform"></div>
+                <div class="player-controls">
+                    <button class="play-btn" id="playBtn" onclick="togglePlay()">▶</button>
+                    <div class="progress-bar" id="progressBarTrack" onclick="seekAudio(event)">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <span class="time-label" id="timeLabel">0:00 / 0:00</span>
+                </div>
+                <audio id="audioPlayer" src="audio.mp3" preload="metadata"></audio>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- RIGHT -->
+    <div class="studio-right">
+
+        <!-- LAUNCH CARD first -->
+        <div class="launch-card">
+            <h3>Ready to Launch?</h3>
+            <p>Once uploaded, your music will be available to curators worldwide within 24&#8211;48 hours.</p>
+            <button class="upload-btn" onclick="submitForm()">Upload Music</button>
+            <p class="upload-terms">By clicking upload, you agree to our <a href="#">Artist Terms &amp; Conditions</a>.</p>
+        </div>
+
+        <!-- UPLOAD STATS -->
+        <div class="stats-card">
+            <h3>Upload Statistics</h3>
+
+            <div class="storage-block">
+                <div class="storage-label">Monthly Storage Used</div>
+                <div class="storage-value">2.4 GB <span>/ 10 GB</span></div>
+                <div class="storage-bar-track" style="margin-top:10px;">
+                    <div class="storage-bar-fill" style="width:24%;"></div>
+                </div>
+                <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:11px;color:var(--text-muted);">
+                    <span>24% used</span><span>7.6 GB free</span>
+                </div>
+            </div>
+
+            <div class="mini-stats">
+                <div class="mini-stat">
+                    <svg viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+                    <div class="stat-val" id="trackCount">284</div>
+                    <div class="stat-lbl">Live Tracks</div>
+                </div>
+                <div class="mini-stat">
+                    <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                    <div class="stat-val" id="playCount">146.5k</div>
+                    <div class="stat-lbl">Total Plays</div>
+                </div>
+                <div class="mini-stat">
+                    <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    <div class="stat-val">1,240</div>
+                    <div class="stat-lbl">Registered</div>
+                </div>
+                <div class="mini-stat">
+                    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                    <div class="stat-val">38</div>
+                    <div class="stat-lbl">Countries</div>
+                </div>
+            </div>
+
+            <div class="activity-label">Recent Activity</div>
+            <div class="activity-item">
+                <div class="activity-name"><span class="activity-dot dot-green"></span>Priya — Raga Fusion</div>
+                <span class="activity-status" style="color:#4ade80;">Approved</span>
+            </div>
+            <div class="activity-item">
+                <div class="activity-name"><span class="activity-dot dot-amber"></span>Arjun — Monsoon Rock</div>
+                <span class="activity-status">Reviewing</span>
+            </div>
+            <div class="activity-item">
+                <div class="activity-name"><span class="activity-dot dot-green"></span>Sana — Dil Ki Baat</div>
+                <span class="activity-status" style="color:#4ade80;">Approved</span>
+            </div>
+            <div class="activity-item">
+                <div class="activity-name"><span class="activity-dot" style="background:#555;"></span>Rohan — City Lights</div>
+                <span class="activity-status" style="color:#888;">Queued</span>
+            </div>
+            <div style="margin-top:14px;" class="upload-count-badge">
+                Uploads Today: <strong id="uploadCount">17</strong>
+            </div>
+        </div>
+
+    </div>
+</div>
+<!-- SITE FOOTER -->
+<div class="site-footer">
+    <div class="site-footer-left">
+        <div class="footer-logo"><img src="logo.png" alt="Bee Music Logo" class="footer-logo-img">BEE MUSIC</div>
+        <p>© 2025–26 BEE MUSIC. All rights reserved.</p>
+        <p style="margin-top:4px;font-size:11px;color:#444;">Web Programming Laboratory &nbsp;·&nbsp; Siddhartha Gupta &nbsp;·&nbsp; 24BCE5063</p>
+    </div>
+    <div class="site-footer-center">
+        <a href="home.html">Home</a>
+        <a href="artists.html">Artists</a>
+        <a href="upload.html">Upload</a>
+        <a href="contact.html">Contact</a>
+    </div>
+</div>
+
+<script>
+    var totalUploads = 0;
+
+    // Character counter
+    document.getElementById("about").addEventListener("input", function() {
+        document.getElementById("charCount").textContent = this.value.length;
+    });
+
+    // Waveform generation
+    (function() {
+        var wf = document.getElementById("waveform");
+        var heights = [18,10,24,8,30,14,20,6,28,12,22,16,10,26,8,20,14,30,10,18,24,8,22,12,16,28,10,20,14,24,8,18];
+        heights.forEach(function(h, i) {
+            var bar = document.createElement("div");
+            bar.className = "waveform-bar" + (i < 11 ? " active" : "");
+            bar.style.height = h + "px";
+            wf.appendChild(bar);
+        });
+    })();
+
+    var playing = false;
+    var audio = document.getElementById('audioPlayer');
+
+    function fmt(s) {
+        if (isNaN(s)) return '0:00';
+        var m = Math.floor(s / 60), sec = Math.floor(s % 60);
+        return m + ':' + (sec < 10 ? '0' : '') + sec;
+    }
+
+    audio.addEventListener('loadedmetadata', function() {
+        document.getElementById('audioDuration').textContent = 'Preview · ' + fmt(audio.duration);
+        document.getElementById('timeLabel').textContent = '0:00 / ' + fmt(audio.duration);
+    });
+
+    audio.addEventListener('timeupdate', function() {
+        var pct = audio.duration ? (audio.currentTime / audio.duration) * 100 : 0;
+        document.getElementById('progressFill').style.width = pct + '%';
+        document.getElementById('timeLabel').textContent = fmt(audio.currentTime) + ' / ' + fmt(audio.duration);
+    });
+
+    audio.addEventListener('ended', function() {
+        playing = false;
+        document.getElementById('playBtn').textContent = '▶';
+        document.getElementById('progressFill').style.width = '0%';
+    });
+
+    function togglePlay() {
+        if (playing) {
+            audio.pause();
+            playing = false;
+            document.getElementById('playBtn').textContent = '▶';
+        } else {
+            audio.play().catch(function(e) { console.warn('Audio play failed:', e); });
+            playing = true;
+            document.getElementById('playBtn').textContent = '⏸';
+        }
+    }
+
+    function seekAudio(e) {
+        if (!audio.duration) return;
+        var bar = document.getElementById('progressBarTrack');
+        var rect = bar.getBoundingClientRect();
+        var pct = (e.clientX - rect.left) / rect.width;
+        audio.currentTime = pct * audio.duration;
+    }
+
+    function submitForm() {
+        var name = document.getElementById("artistName").value;
+        var email = document.getElementById("email").value;
+        var genre = document.getElementById("genre").value;
+        var experience = document.getElementById("experience").value;
+        var about = document.getElementById("about").value;
+
+        if (!name || !email || !genre || !experience || !about) {
+            alert("Please fill in all required fields.");
+            return false;
+        }
+
+        totalUploads++;
+        document.getElementById("uploadCount").textContent = totalUploads;
+        document.getElementById("trackCount").textContent = totalUploads;
+        document.getElementById("playCount").textContent = (totalUploads * 8400).toLocaleString().replace(/,(\d{3})$/, '.$1k').split('.')[0] + 'k';
+
+        var pct = Math.min(totalUploads * 8, 100);
+        document.getElementById("storageFill").style.width = pct + "%";
+        document.getElementById("uploadCountDisplay").textContent = pct + "%";
+
+        alert("Thank you " + name + "! Your music has been submitted! 🎵\nUpload #" + totalUploads);
+        document.getElementById("uploadForm").reset();
+        document.getElementById("charCount").textContent = "0";
+        return false;
+    }
+</script>
+<div id="react-toast-root"></div>
+<script>
+(function() {
+  const { useState, useEffect, useCallback } = React;
+  const NOTIFICATIONS = [
+    { title: "New Listener", msg: "Someone in Mumbai just liked Rahul \u2764" },
+    { title: "Trending Now", msg: "Ananya crossed 12,500 streams \uD83C\uDFB5" },
+    { title: "New Upload", msg: "Meera dropped a new Pop track \uD83C\uDFA4" },
+    { title: "Top Chart", msg: "Karthik is climbing the Melody charts \uD83D\uDCC8" },
+    { title: "Live Now", msg: "Neha is streaming Acoustic sessions \uD83C\uDFB8" },
+  ];
+  function Toast({ title, msg, onRemove }) {
+    useEffect(() => { const t = setTimeout(onRemove, 3800); return () => clearTimeout(t); }, []);
+    return React.createElement("div", { className: "bee-toast", onClick: onRemove },
+      React.createElement("div", { className: "bee-toast-title" }, title),
+      React.createElement("div", null, msg)
+    );
+  }
+  function ToastContainer() {
+    const [toasts, setToasts] = useState([]);
+    const remove = useCallback((id) => setToasts(t => t.filter(x => x.id !== id)), []);
+    useEffect(() => {
+      let idx = 0;
+      const fire = () => { const n = NOTIFICATIONS[idx % NOTIFICATIONS.length]; const id = Date.now(); setToasts(t => [...t.slice(-2), { ...n, id }]); idx++; };
+      const t1 = setTimeout(fire, 2500);
+      const iv = setInterval(fire, 7000);
+      return () => { clearTimeout(t1); clearInterval(iv); };
+    }, []);
+    return React.createElement("div", null, toasts.map(t => React.createElement(Toast, { key: t.id, title: t.title, msg: t.msg, onRemove: () => remove(t.id) })));
+  }
+  ReactDOM.createRoot(document.getElementById("react-toast-root")).render(React.createElement(ToastContainer));
+})();
+</script>
+
+<script>
+// ── LIVE FORM VALIDATION ──
+var FIELDS = {
+    artistName: {
+        validate: function(v) { return v.trim().length >= 2; },
+        ok:  'Looks great!',
+        err: 'At least 2 characters required'
+    },
+    email: {
+        validate: function(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); },
+        ok:  'Valid email address',
+        err: 'Enter a valid email address'
+    },
+    genre: {
+        validate: function(v) { return v !== ''; },
+        ok:  'Genre selected',
+        err: 'Please select a genre'
+    },
+    language: {
+        validate: function(v) { return v.trim().length >= 2; },
+        ok:  'Got it!',
+        err: 'Please enter a language'
+    },
+    experience: {
+        validate: function(v) { return /\d/.test(v) && v.trim().length >= 1; },
+        ok:  'Experience noted',
+        err: 'Include a number, e.g. "3 Years"'
+    },
+    about: {
+        validate: function(v) { return v.trim().length >= 20; },
+        ok:  'Nice bio!',
+        err: 'Write at least 20 characters'
+    },
+};
+
+function validateField(el) {
+    var id   = el.id;
+    var rule = FIELDS[id];
+    if (!rule) return;
+    var val   = el.value;
+    var valid = rule.validate(val);
+    var empty = val.trim() === '' || val === '';
+
+    var chk  = document.getElementById('chk-' + id);
+    var hint = document.getElementById('hint-' + id);
+
+    if (empty) {
+        el.classList.remove('valid','invalid');
+        if (chk)  { chk.textContent = ''; chk.className = 'field-check hidden'; }
+        if (hint) { hint.className = 'field-hint'; hint.textContent = ''; }
+    } else if (valid) {
+        el.classList.remove('invalid'); el.classList.add('valid');
+        if (chk)  { chk.textContent = '✓'; chk.className = 'field-check valid'; }
+        if (hint) { hint.className = 'field-hint show ok'; hint.textContent = rule.ok; }
+    } else {
+        el.classList.remove('valid'); el.classList.add('invalid');
+        if (chk)  { chk.textContent = '✕'; chk.className = 'field-check invalid'; }
+        if (hint) { hint.className = 'field-hint show err'; hint.textContent = rule.err; }
+    }
+    updateProgress();
+}
+
+function updateProgress() {
+    var total  = Object.keys(FIELDS).length;
+    var passed = 0;
+    Object.keys(FIELDS).forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el && FIELDS[id].validate(el.value)) passed++;
+    });
+    var pct = Math.round((passed / total) * 100);
+    var fill  = document.getElementById('formProgressFill');
+    var label = document.getElementById('progressPct');
+    if (fill)  fill.style.width = pct + '%';
+    if (label) label.textContent = pct + '%';
+
+    var btn = document.querySelector('.upload-btn');
+    if (btn) {
+        if (pct === 100) btn.classList.add('ready');
+        else             btn.classList.remove('ready');
+    }
+}
+
+// validate on blur too (for fields the user skips)
+Object.keys(FIELDS).forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) {
+        el.addEventListener('blur', function() {
+            if (el.value.trim() !== '') validateField(el);
+        });
+    }
+});
+</script>
+
+<script src="liked-artists.js"></script>
+</body>
+</html>
