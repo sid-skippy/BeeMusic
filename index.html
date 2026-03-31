@@ -1,0 +1,636 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>BeeMusic</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&display=swap">
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <style>
+      #react-toast-root { position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+      .bee-toast { background: #161616; border: 1px solid #2a2a2a; border-left: 3px solid #f4a300; border-radius: 8px; padding: 14px 18px; font-family: 'DM Sans', sans-serif; font-size: 13px; color: #f0f0f0; min-width: 240px; max-width: 300px; pointer-events: all; animation: toastIn 0.3s ease; cursor: pointer; }
+      @keyframes toastIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+      .bee-toast-title { font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: #f4a300; margin-bottom: 4px; font-weight: 600; }
+      .live-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #f4a300; margin-right: 6px; animation: pulse 1.5s infinite; vertical-align: middle; }
+      @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+    </style>
+    <style>
+        /* ── FEATURES STRIP ── */
+        .features-strip {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            background: #111;
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            padding: 52px 48px;
+            margin: 0;
+        }
+
+        .feature-item {
+            padding: 0 40px;
+            border-right: 1px solid var(--border);
+        }
+
+        .feature-item:first-child { padding-left: 0; }
+        .feature-item:last-child { border-right: none; padding-right: 0; }
+
+        .feature-icon {
+            display: block;
+            margin-bottom: 18px;
+            line-height: 1;
+        }
+
+        .feature-icon svg {
+            width: 34px;
+            height: 34px;
+            stroke: var(--gold);
+            fill: none;
+            stroke-width: 1.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .feature-item h3 {
+            font-family: 'ClashDisplay-Variable', 'Clash Display', sans-serif;
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text);
+            margin: 0 0 10px;
+            padding: 0;
+            border: none;
+        }
+
+        .feature-item p {
+            font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.7;
+            margin: 0;
+        }
+
+        /* ── SITE FOOTER ── */
+        .site-footer {
+            background: #0a0a0a;
+            border-top: 1px solid var(--border);
+            padding: 28px 48px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .footer-logo {
+            font-family: 'ClashDisplay-Variable', 'Clash Display', sans-serif;
+            font-size: 15px;
+            font-weight: 800;
+            color: var(--gold);
+            margin-bottom: 6px;
+        }
+
+        .site-footer-left p {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin: 0;
+            line-height: 1.7;
+        }
+
+        .site-footer-center {
+            display: flex;
+            gap: 28px;
+        }
+
+        .site-footer-center a {
+            font-size: 13px;
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .site-footer-center a:hover { color: var(--text); }
+</style>
+</head>
+
+<body>
+
+<!-- NAV -->
+<nav>
+    <a href="home.html" class="nav-logo"><img src="logo.png" alt="Bee Music Logo" class="nav-logo-img">BEE MUSIC</a>
+    <p class="nav-links">
+        <a href="home.html" class="active">Home</a>
+        <a href="artists.html">Artists</a>
+        <a href="upload.html">Upload</a>
+        <a href="contact.html">Contact</a>
+    </p>
+</nav>
+
+<!-- MARQUEE -->
+<marquee>WELCOME TO BEE MUSIC &nbsp;&nbsp;&nbsp;✦&nbsp;&nbsp;&nbsp; DISCOVER RISING VOCAL STARS &nbsp;&nbsp;&nbsp;✦&nbsp;&nbsp;&nbsp; STREAM • DISCOVER • SUPPORT &nbsp;&nbsp;&nbsp;✦&nbsp;&nbsp;&nbsp; BEEMUSIC.IN</marquee>
+
+<!-- HERO -->
+<div class="hero" style="justify-content:space-between;align-items:center;">
+    <canvas class="hero-canvas" id="heroCanvas"></canvas>
+    <div class="hero-rays"></div>
+    <div class="hero-content">
+        <p class="hero-label">Editorial Choice</p>
+        <h1>Discover the<br><span>Next Big Star</span></h1>
+        <p class="hero-sub"><span>A curated ecosystem for independent vocal artists. From raw talent to global icons, explore the future of sound.</span></p>
+    </div>
+    <!-- LIVE TICKER RIGHT -->
+    <div style="position:relative;z-index:1;flex-shrink:0;text-align:center;padding:36px 40px;background:rgba(244,163,0,0.04);border:1px solid rgba(244,163,0,0.15);border-radius:16px;backdrop-filter:blur(8px);min-width:220px;">
+        <div style="font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);font-family:'DM Sans',sans-serif;font-weight:600;margin-bottom:14px;display:flex;align-items:center;justify-content:center;gap:8px;">
+            <span id="react-ticker-dot"></span>LIVE
+        </div>
+        <div id="react-ticker-root" style="font-family:'ClashDisplay-Variable','Clash Display',sans-serif;font-size:52px;font-weight:700;color:var(--text);line-height:1;display:block;"></div>
+        <div style="font-size:13px;color:var(--text-muted);font-family:'DM Sans',sans-serif;margin-top:10px;letter-spacing:0.5px;">listeners right now</div>
+    </div>
+</div>
+
+<!-- FEATURES STRIP -->
+<div class="features-strip">
+    <div class="feature-item">
+        <span class="feature-icon">
+            <svg viewBox="0 0 24 24"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3z"/><path d="M3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>
+        </span>
+        <h3>Studio Fidelity</h3>
+        <p>Lossless audio streaming that preserves every sonic detail exactly as recorded.</p>
+    </div>
+    <div class="feature-item">
+        <span class="feature-icon">
+            <svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 2v3M12 2v3M16 2v3M8 19v3M12 19v3M16 19v3M2 8h3M2 12h3M2 16h3M19 8h3M19 12h3M19 16h3"/></svg>
+        </span>
+        <h3>AI Curation</h3>
+        <p>Our neural engine learns your vibe to discover artists you'll love before anyone else.</p>
+    </div>
+    <div class="feature-item">
+        <span class="feature-icon">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><path d="M16.24 7.76A6 6 0 0 1 18 12"/><path d="M7.76 16.24A6 6 0 0 1 6 12"/></svg>
+        </span>
+        <h3>Direct Support</h3>
+        <p>90% of every rupee spent on artist collectibles goes directly to the creator.</p>
+    </div>
+    <div class="feature-item">
+        <span class="feature-icon">
+            <svg viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="2"/><circle cx="12" cy="18" r="1" fill="var(--gold)" stroke="none"/></svg>
+        </span>
+        <h3>Multi-Device</h3>
+        <p>Seamless handoff between your vinyl deck, mobile, and smart home speakers.</p>
+    </div>
+</div>
+
+<!-- PLATFORM STATS BAR -->
+<div id="stats-bar-root" style="background:#0e0e0e;border-bottom:1px solid var(--border);padding:18px 48px;display:flex;gap:48px;align-items:center;flex-wrap:wrap;"></div>
+
+<!-- TRENDING ARTISTS SECTION -->
+<div style="padding:48px 40px 0;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+        <p style="font-size:11px;letter-spacing:3px;color:var(--gold);text-transform:uppercase;font-family:'DM Sans',sans-serif;font-weight:600;margin:0;">Rising Talent</p>
+        <a href="artists.html" style="font-size:13px;color:var(--text-muted);text-decoration:none;font-family:'DM Sans',sans-serif;transition:color 0.2s;" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--text-muted)'">View all artists →</a>
+    </div>
+    <h2 style="margin:0 0 32px;padding:0;border:none;font-size:32px;">Top Rising Artists — Dec 2025</h2>
+</div>
+
+<!-- ARTIST CARDS GRID -->
+<div id="artist-cards-root" style="display:flex;gap:16px;padding:0 40px 48px;overflow-x:auto;scrollbar-width:thin;scrollbar-color:var(--border) transparent;-webkit-overflow-scrolling:touch;"></div>
+<style>
+#artist-cards-root::-webkit-scrollbar { height: 4px; }
+#artist-cards-root::-webkit-scrollbar-track { background: transparent; }
+#artist-cards-root::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+#artist-cards-root > div { flex-shrink: 0; width: 210px; }
+</style>
+
+<!-- Universal liked panel provided by liked-artists.js -->
+
+<!-- DIVIDER -->
+<div style="height:1px;background:var(--border);margin:0 40px;"></div>
+
+<!-- HOW IT WORKS -->
+<div style="padding:48px 40px;">
+    <p style="font-size:11px;letter-spacing:3px;color:var(--gold);text-transform:uppercase;font-family:'DM Sans',sans-serif;font-weight:600;margin-bottom:8px;">The Process</p>
+    <h2 style="margin:0 0 32px;padding:0;border:none;font-size:28px;">How BEE MUSIC Works</h2>
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:16px;">
+        <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:24px;">
+            <div style="font-family:'ClashDisplay-Variable','Clash Display',sans-serif;font-size:36px;color:rgba(244,163,0,0.2);font-weight:700;margin-bottom:12px;">01</div>
+            <p style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:6px;font-family:'ClashDisplay-Variable','Clash Display',sans-serif;">Register</p>
+            <p style="font-size:12px;color:var(--text-muted);margin:0;line-height:1.6;">Artists sign up free on the BEE MUSIC platform.</p>
+        </div>
+        <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:24px;">
+            <div style="font-family:'ClashDisplay-Variable','Clash Display',sans-serif;font-size:36px;color:rgba(244,163,0,0.2);font-weight:700;margin-bottom:12px;">02</div>
+            <p style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:6px;font-family:'ClashDisplay-Variable','Clash Display',sans-serif;">Upload</p>
+            <p style="font-size:12px;color:var(--text-muted);margin:0;line-height:1.6;">Submit original vocal tracks via Artist Studio.</p>
+        </div>
+        <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:24px;">
+            <div style="font-family:'ClashDisplay-Variable','Clash Display',sans-serif;font-size:36px;color:rgba(244,163,0,0.2);font-weight:700;margin-bottom:12px;">03</div>
+            <p style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:6px;font-family:'ClashDisplay-Variable','Clash Display',sans-serif;">Review</p>
+            <p style="font-size:12px;color:var(--text-muted);margin:0;line-height:1.6;">Our team reviews and publishes within 48 hrs.</p>
+        </div>
+        <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:24px;">
+            <div style="font-family:'ClashDisplay-Variable','Clash Display',sans-serif;font-size:36px;color:rgba(244,163,0,0.2);font-weight:700;margin-bottom:12px;">04</div>
+            <p style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:6px;font-family:'ClashDisplay-Variable','Clash Display',sans-serif;">Stream</p>
+            <p style="font-size:12px;color:var(--text-muted);margin:0;line-height:1.6;">Listeners stream live. Top artists gain visibility.</p>
+        </div>
+        <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:24px;">
+            <div style="font-family:'ClashDisplay-Variable','Clash Display',sans-serif;font-size:36px;color:rgba(244,163,0,0.2);font-weight:700;margin-bottom:12px;">05</div>
+            <p style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:6px;font-family:'ClashDisplay-Variable','Clash Display',sans-serif;">Grow</p>
+            <p style="font-size:12px;color:var(--text-muted);margin:0;line-height:1.6;">Stream counts translate to real-world opportunities.</p>
+        </div>
+    </div>
+</div>
+
+<!-- SITE FOOTER -->
+<div class="site-footer">
+    <div class="site-footer-left">
+        <div class="footer-logo"><img src="logo.png" alt="Bee Music Logo" class="footer-logo-img">BEE MUSIC</div>
+        <p>© 2025–26 BEE MUSIC. All rights reserved.</p>
+        <p style="margin-top:4px;font-size:11px;color:#444;">Web Programming Laboratory &nbsp;·&nbsp; Siddhartha Gupta &nbsp;·&nbsp; 24BCE5063</p>
+    </div>
+    <div class="site-footer-center">
+        <a href="home.html">Home</a>
+        <a href="artists.html">Artists</a>
+        <a href="upload.html">Upload</a>
+        <a href="contact.html">Contact</a>
+    </div>
+</div>
+</div>
+
+<script>
+// ── LIKED ARTISTS (handled by liked-artists.js universal panel) ──
+</script>
+<div id="react-toast-root"></div>
+<div id="react-ticker-dot-standalone" style="display:none;"></div>
+
+<script>
+(function() {
+  const { useState, useEffect, useCallback, useRef } = React;
+
+  // ── ARTISTS DATA ──
+  const ARTISTS = [
+    { name: "Rahul",       emoji: "🎻", genre: "Classical Fusion", lang: "Tamil",    yrs: 3, streams: 18200,  trend: +12 },
+    { name: "Ananya",      emoji: "🎵", genre: "Indie",            lang: "English",  yrs: 2, streams: 12500,  trend: +8  },
+    { name: "Meera",       emoji: "🎤", genre: "Pop",              lang: "Hindi",    yrs: 1, streams: 9800,   trend: +21 },
+    { name: "Karthik",     emoji: "🎼", genre: "Melody",           lang: "Tamil",    yrs: 2, streams: 7400,   trend: +5  },
+    { name: "Neha",        emoji: "🪕", genre: "Acoustic",         lang: "English",  yrs: 1, streams: 6950,   trend: +3  },
+    { name: "Priya",       emoji: "🎹", genre: "Carnatic",         lang: "Telugu",   yrs: 4, streams: 23100,  trend: +18 },
+    { name: "Arjun",       emoji: "🎸", genre: "Rock Fusion",      lang: "Hindi",    yrs: 5, streams: 31400,  trend: +7  },
+    { name: "Divya",       emoji: "🎙️", genre: "Sufi",             lang: "Urdu",     yrs: 3, streams: 15600,  trend: +14 },
+    { name: "Vikram",      emoji: "🥁", genre: "Fusion Jazz",      lang: "Tamil",    yrs: 6, streams: 28900,  trend: +9  },
+    { name: "Sana",        emoji: "🎵", genre: "Ghazal",           lang: "Hindi",    yrs: 2, streams: 11200,  trend: +25 },
+    { name: "Rohan",       emoji: "🎸", genre: "Indie Rock",       lang: "English",  yrs: 3, streams: 19700,  trend: +11 },
+    { name: "Lakshmi",     emoji: "🎤", genre: "Devotional",       lang: "Sanskrit", yrs: 7, streams: 34500,  trend: +4  },
+  ];
+
+  // ── TOAST NOTIFICATIONS ──
+  const NOTIFICATIONS = [
+    { title: "New Listener",   msg: "Someone in Mumbai just liked Rahul ❤" },
+    { title: "Trending Now",   msg: "Arjun crossed 31K streams this week 🔥" },
+    { title: "New Upload",     msg: "Priya dropped a new Carnatic track 🎹" },
+    { title: "Top Chart",      msg: "Sana is climbing fast — +25% this week 📈" },
+    { title: "Live Now",       msg: "Vikram is streaming Fusion Jazz live 🎷" },
+    { title: "Fan Milestone",  msg: "Lakshmi hit 34.5K all-time streams 🏆" },
+    { title: "New Fan",        msg: "Divya gained 120 new followers today 🌟" },
+    { title: "Hot Track",      msg: "Rohan's Indie Rock track is viral 🎸" },
+  ];
+
+  function Toast({ title, msg, onRemove }) {
+    useEffect(() => { const t = setTimeout(onRemove, 3800); return () => clearTimeout(t); }, []);
+    return React.createElement("div", { className: "bee-toast", onClick: onRemove },
+      React.createElement("div", { className: "bee-toast-title" }, title),
+      React.createElement("div", null, msg)
+    );
+  }
+
+  function ToastContainer() {
+    const [toasts, setToasts] = useState([]);
+    const remove = useCallback((id) => setToasts(t => t.filter(x => x.id !== id)), []);
+    useEffect(() => {
+      let idx = Math.floor(Math.random() * NOTIFICATIONS.length);
+      const fire = () => {
+        const n = NOTIFICATIONS[idx % NOTIFICATIONS.length];
+        const id = Date.now();
+        setToasts(t => [...t.slice(-2), { ...n, id }]);
+        idx++;
+      };
+      const t1 = setTimeout(fire, 2200);
+      const iv = setInterval(fire, 7000);
+      return () => { clearTimeout(t1); clearInterval(iv); };
+    }, []);
+    return React.createElement("div", null, toasts.map(t =>
+      React.createElement(Toast, { key: t.id, title: t.title, msg: t.msg, onRemove: () => remove(t.id) })
+    ));
+  }
+  ReactDOM.createRoot(document.getElementById("react-toast-root")).render(React.createElement(ToastContainer));
+
+  // ── LIVE TICKER ──
+  function LiveTicker() {
+    const [count, setCount] = useState(54892);
+    useEffect(() => {
+      const iv = setInterval(() => setCount(c => c + Math.floor(Math.random() * 5 + 1)), 1800);
+      return () => clearInterval(iv);
+    }, []);
+    return React.createElement("span", null, count.toLocaleString());
+  }
+  ReactDOM.createRoot(document.getElementById("react-ticker-root")).render(React.createElement(LiveTicker));
+
+  function LiveDot() {
+    return React.createElement("span", { style: { display:"inline-block", width:"8px", height:"8px", borderRadius:"50%", background:"#f4a300", animation:"pulse 1.5s infinite" } });
+  }
+  const dotEl = document.getElementById("react-ticker-dot");
+  if (dotEl) ReactDOM.createRoot(dotEl).render(React.createElement(LiveDot));
+
+  // ── PLATFORM STATS BAR ──
+  function StatItem({ label, value, suffix }) {
+    const [display, setDisplay] = useState(value);
+    useEffect(() => {
+      const iv = setInterval(() => setDisplay(v => v + Math.floor(Math.random() * 3)), 3000 + Math.random() * 4000);
+      return () => clearInterval(iv);
+    }, []);
+    return React.createElement("div", { style: { display:"flex", flexDirection:"column", gap:"2px" } },
+      React.createElement("div", { style: { fontFamily:"'ClashDisplay-Variable','Clash Display',sans-serif", fontSize:"22px", fontWeight:"700", color:"var(--text)" } },
+        display.toLocaleString(), React.createElement("span", { style: { color:"var(--gold)", fontSize:"14px", marginLeft:"2px" } }, suffix || "")
+      ),
+      React.createElement("div", { style: { fontSize:"11px", letterSpacing:"1.5px", textTransform:"uppercase", color:"var(--text-muted)", fontFamily:"'DM Sans',sans-serif" } }, label)
+    );
+  }
+
+  function StatsDivider() {
+    return React.createElement("div", { style: { width:"1px", height:"36px", background:"var(--border)", flexShrink:0 } });
+  }
+
+  function StatsBar() {
+    return React.createElement("div", { style: { display:"flex", gap:"40px", alignItems:"center", flexWrap:"wrap" } },
+      React.createElement(StatItem, { label: "Total Streams", value: 146550 }),
+      React.createElement(StatsDivider),
+      React.createElement(StatItem, { label: "Artists Live", value: 12 }),
+      React.createElement(StatsDivider),
+      React.createElement(StatItem, { label: "Tracks Published", value: 284 }),
+      React.createElement(StatsDivider),
+      React.createElement(StatItem, { label: "Countries Reached", value: 38 }),
+      React.createElement(StatsDivider),
+      React.createElement(StatItem, { label: "Avg. Rating", value: null, suffix: null, custom: "4.8 ★" }),
+    );
+  }
+
+  // simpler stat item for avg
+  function StatsBarFull() {
+    const [streams, setStreams] = useState(146550);
+    const [listeners, setListeners] = useState(54892);
+    useEffect(() => {
+      const iv = setInterval(() => { setStreams(s => s + Math.floor(Math.random()*3)); setListeners(l => l + Math.floor(Math.random()*4)); }, 2400);
+      return () => clearInterval(iv);
+    }, []);
+    const Item = (label, val, suf) => React.createElement("div", { style:{display:"flex",flexDirection:"column",gap:"2px"} },
+      React.createElement("div", { style:{fontFamily:"'ClashDisplay-Variable','Clash Display',sans-serif",fontSize:"22px",fontWeight:"700",color:"var(--text)"} }, val, suf ? React.createElement("span",{style:{color:"var(--gold)",fontSize:"14px",marginLeft:"2px"}},suf) : null),
+      React.createElement("div", { style:{fontSize:"11px",letterSpacing:"1.5px",textTransform:"uppercase",color:"var(--text-muted)",fontFamily:"'DM Sans',sans-serif"} }, label)
+    );
+    const Div = () => React.createElement("div",{style:{width:"1px",height:"36px",background:"var(--border)"}});
+    return React.createElement("div",{style:{display:"flex",gap:"40px",alignItems:"center",flexWrap:"wrap"}},
+      Item("Total Streams", streams.toLocaleString()),
+      Div(), Item("Active Listeners", listeners.toLocaleString()),
+      Div(), Item("Artists Live", "12"),
+      Div(), Item("Tracks Published", "284"),
+      Div(), Item("Countries Reached", "38"),
+      Div(), Item("Avg. Rating", "4.8 ★")
+    );
+  }
+
+  const statsEl = document.getElementById("stats-bar-root");
+  if (statsEl) ReactDOM.createRoot(statsEl).render(React.createElement(StatsBarFull));
+
+  // ── ARTIST CARDS ──
+  function WaveBar({ base }) {
+    const [h, setH] = React.useState(base);
+    React.useEffect(() => {
+      const iv = setInterval(() => setH(base + (Math.random()-0.5)*base*0.8), 110);
+      return () => clearInterval(iv);
+    }, []);
+    return React.createElement("div", { style:{width:"3px",borderRadius:"2px",background:"var(--gold)",opacity:"0.8",height:h+"px",transition:"height 0.1s ease"} });
+  }
+
+  function ArtistCard({ artist }) {
+    const [liked, setLiked] = useState(false);
+    const [streaming, setStreaming] = useState(false);
+    const [streams, setStreams] = useState(artist.streams);
+    useEffect(() => {
+      const iv = setInterval(() => setStreams(s => s + Math.floor(Math.random() * 2)), 3000 + Math.random() * 5000);
+      return () => clearInterval(iv);
+    }, []);
+
+    const handleLike = () => {
+      if (!liked) {
+        setLiked(true);
+        window.likeArtist(artist.name, artist.emoji);
+      }
+    };
+
+    const trendColor = artist.trend >= 10 ? "#4ade80" : artist.trend >= 5 ? "var(--gold)" : "var(--text-muted)";
+
+    return React.createElement("div", {
+      style: { background:"var(--bg-card)", border: liked ? "1px solid rgba(244,163,0,0.5)" : "1px solid var(--border)", borderRadius:"10px", padding:"20px", display:"flex", flexDirection:"column", gap:"10px", transition:"border-color 0.2s, transform 0.2s", cursor:"default" },
+      onMouseEnter: e => e.currentTarget.style.transform = "translateY(-3px)",
+      onMouseLeave: e => e.currentTarget.style.transform = "translateY(0)"
+    },
+      // Avatar + trend
+      React.createElement("div", { style:{display:"flex",alignItems:"center",justifyContent:"space-between"} },
+        React.createElement("div", { style:{width:"52px",height:"52px",borderRadius:"50%",background:"linear-gradient(135deg,#2a1f00,#f4a300)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"24px"} }, artist.emoji),
+        React.createElement("span", { style:{fontSize:"11px",color:trendColor,fontWeight:"600",background:"rgba(255,255,255,0.05)",padding:"3px 8px",borderRadius:"20px"} }, "+" + artist.trend + "%")
+      ),
+      // Name + genre
+      React.createElement("div", null,
+        React.createElement("div", { style:{fontFamily:"'ClashDisplay-Variable','Clash Display',sans-serif",fontSize:"16px",fontWeight:"700",color:"var(--text)"} }, artist.name),
+        React.createElement("a", { href:"genre.html?genre="+encodeURIComponent(artist.genre), style:{display:"inline-block",background:"rgba(244,163,0,0.12)",color:"var(--gold)",fontSize:"10px",fontWeight:"600",letterSpacing:"1px",textTransform:"uppercase",padding:"2px 8px",borderRadius:"20px",fontFamily:"'DM Sans',sans-serif",marginTop:"4px",textDecoration:"none",cursor:"pointer"} }, artist.genre)
+      ),
+      // Meta
+      React.createElement("div", { style:{fontSize:"12px",color:"var(--text-muted)",display:"flex",flexDirection:"column",gap:"2px"} },
+        React.createElement("span", null, artist.lang + " · " + artist.yrs + " yr" + (artist.yrs > 1 ? "s" : ""))
+      ),
+      // Streams
+      React.createElement("div", { style:{fontFamily:"'ClashDisplay-Variable','Clash Display',sans-serif",fontSize:"20px",fontWeight:"700",color:"var(--gold)"} },
+        streams.toLocaleString(), React.createElement("span", { style:{fontFamily:"'DM Sans',sans-serif",fontSize:"11px",color:"var(--text-muted)",fontWeight:"400",marginLeft:"4px"} }, "streams")
+      ),
+      // Buttons
+      React.createElement("div", { style:{display:"flex",gap:"8px",marginTop:"auto",paddingTop:"10px",borderTop:"1px solid var(--border)"} },
+        React.createElement("button", {
+          onClick: handleLike,
+          style:{flex:1,fontSize:"12px",padding:"7px 0",background: liked ? "rgba(244,163,0,0.15)" : "transparent", border: liked ? "1px solid var(--gold)" : "1px solid var(--border)", color: liked ? "var(--gold)" : "var(--text-muted)", borderRadius:"20px", cursor:"pointer", fontFamily:"'DM Sans',sans-serif", transition:"all 0.2s"}
+        }, liked ? "❤ Liked" : "❤ Like"),
+        React.createElement(React.Fragment, null,
+          React.createElement("button", {
+            onClick: () => setStreaming(s => !s),
+            style:{flex:1,fontSize:"12px",padding:"7px 0",
+              background: streaming ? "rgba(244,163,0,0.08)" : "transparent",
+              border: streaming ? "1px solid var(--gold)" : "1px solid var(--border)",
+              color: streaming ? "var(--gold)" : "var(--text-muted)",
+              borderRadius:"20px",cursor:"pointer",fontFamily:"'DM Sans',sans-serif",transition:"all 0.2s"}
+          }, streaming ? "⏹ Stop" : "▶ Stream"),
+          streaming && React.createElement("div", {
+            style:{display:"flex",alignItems:"center",gap:"2px",height:"20px",marginTop:"8px",padding:"0 4px"}
+          }, Array.from({length:18}, (_, i) => React.createElement(WaveBar, {key:i, base: [8,14,6,20,10,18,4,16,12,20,8,14,18,6,20,10,14,8][i]})))
+        )
+      )
+    );
+  }
+
+  function ArtistGrid() {
+    return React.createElement(React.Fragment, null,
+      ARTISTS.map(a => React.createElement(ArtistCard, { key: a.name, artist: a }))
+    );
+  }
+
+  const gridEl = document.getElementById("artist-cards-root");
+  if (gridEl) ReactDOM.createRoot(gridEl).render(React.createElement(ArtistGrid));
+
+})();
+</script>
+<script src="liked-artists.js"></script>
+
+<script>
+(function() {
+    var canvas = document.getElementById('heroCanvas');
+    if (!canvas) return;
+    var ctx = canvas.getContext('2d');
+
+    function resize() {
+        canvas.width  = canvas.offsetWidth;
+        canvas.height = canvas.offsetHeight;
+    }
+    resize();
+    window.addEventListener('resize', function() { resize(); initParticles(); });
+
+    var GOLD    = [244, 163,   0];
+    var AMBER   = [255, 120,   0];
+    var WHITE   = [240, 220, 180];
+
+    var particles = [];
+    var lines     = [];
+    var NUM_P     = 55;
+    var NUM_L     = 7;
+
+    /* ── Floating dust particles ── */
+    function makeParticle() {
+        var palette = [GOLD, AMBER, WHITE];
+        var col = palette[Math.floor(Math.random() * palette.length)];
+        return {
+            x:     Math.random() * canvas.width,
+            y:     Math.random() * canvas.height,
+            r:     0.6 + Math.random() * 1.8,
+            vx:    (Math.random() - 0.5) * 0.25,
+            vy:   -(0.08 + Math.random() * 0.22),
+            alpha: 0.1 + Math.random() * 0.55,
+            col:   col,
+            life:  Math.random(),
+            decay: 0.0008 + Math.random() * 0.0012
+        };
+    }
+
+    /* ── Slow diagonal light streaks ── */
+    function makeLine() {
+        return {
+            x:     Math.random() * canvas.width * 1.4 - canvas.width * 0.2,
+            y:     -20,
+            len:   60 + Math.random() * 120,
+            angle: Math.PI / 2 + (Math.random() - 0.5) * 0.6,
+            speed: 0.18 + Math.random() * 0.22,
+            alpha: 0.03 + Math.random() * 0.07,
+            width: 0.5 + Math.random() * 1.2
+        };
+    }
+
+    function initParticles() {
+        particles = [];
+        lines = [];
+        for (var i = 0; i < NUM_P; i++) {
+            var p = makeParticle();
+            p.y = Math.random() * canvas.height; // scatter vertically on init
+            particles.push(p);
+        }
+        for (var j = 0; j < NUM_L; j++) {
+            var l = makeLine();
+            l.y = Math.random() * canvas.height; // scatter on init
+            lines.push(l);
+        }
+    }
+    initParticles();
+
+    /* ── Slow breathing glow in top-right ── */
+    var glowT = 0;
+
+    function drawGlow() {
+        glowT += 0.008;
+        var pulse = 0.55 + 0.45 * Math.sin(glowT);
+
+        // Primary warm glow
+        var g1 = ctx.createRadialGradient(
+            canvas.width * 0.78, canvas.height * 0.2, 0,
+            canvas.width * 0.78, canvas.height * 0.2, canvas.width * 0.45
+        );
+        g1.addColorStop(0,   'rgba(244,163,0,' + (0.18 * pulse) + ')');
+        g1.addColorStop(0.4, 'rgba(180,90,0,'  + (0.08 * pulse) + ')');
+        g1.addColorStop(1,   'rgba(0,0,0,0)');
+        ctx.fillStyle = g1;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Secondary cooler accent bottom-left
+        var pulse2 = 0.55 + 0.45 * Math.sin(glowT + 2.1);
+        var g2 = ctx.createRadialGradient(
+            canvas.width * 0.1, canvas.height * 0.85, 0,
+            canvas.width * 0.1, canvas.height * 0.85, canvas.width * 0.3
+        );
+        g2.addColorStop(0,   'rgba(120,60,0,' + (0.1 * pulse2) + ')');
+        g2.addColorStop(1,   'rgba(0,0,0,0)');
+        ctx.fillStyle = g2;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+
+    function drawLines() {
+        lines.forEach(function(l, i) {
+            var ex = l.x + Math.cos(l.angle) * l.len;
+            var ey = l.y + Math.sin(l.angle) * l.len;
+            var grad = ctx.createLinearGradient(l.x, l.y, ex, ey);
+            grad.addColorStop(0,   'rgba(244,163,0,0)');
+            grad.addColorStop(0.5, 'rgba(244,163,0,' + l.alpha + ')');
+            grad.addColorStop(1,   'rgba(244,163,0,0)');
+            ctx.beginPath();
+            ctx.moveTo(l.x, l.y);
+            ctx.lineTo(ex, ey);
+            ctx.strokeStyle = grad;
+            ctx.lineWidth = l.width;
+            ctx.stroke();
+
+            l.y += l.speed;
+            if (l.y > canvas.height + 30) {
+                lines[i] = makeLine();
+            }
+        });
+    }
+
+    function drawParticles() {
+        particles.forEach(function(p, i) {
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(' + p.col[0] + ',' + p.col[1] + ',' + p.col[2] + ',' + p.alpha + ')';
+            ctx.fill();
+
+            p.x  += p.vx;
+            p.y  += p.vy;
+            p.alpha -= p.decay;
+
+            if (p.alpha <= 0 || p.y < -10) {
+                var np = makeParticle();
+                np.y = canvas.height + 5;
+                particles[i] = np;
+            }
+        });
+    }
+
+    function tick() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawGlow();
+        drawLines();
+        drawParticles();
+        requestAnimationFrame(tick);
+    }
+    tick();
+})();
+</script>
+
+</body>

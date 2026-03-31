@@ -14,6 +14,15 @@
       .bee-toast-title { font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: #f4a300; margin-bottom: 4px; font-weight: 600; }
 
     /* ── ARTIST MODAL ── */
+    body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.page-content {
+    flex: 1;
+}
     #artist-modal-overlay {
         position: fixed; inset: 0; z-index: 20000;
         background: rgba(0,0,0,0.85);
@@ -507,12 +516,13 @@
 </style>
 </head>
 <body>
+<div class="page-content">
 
 <!-- NAV -->
 <nav>
-    <a href="home.html" class="nav-logo"><img src="logo.png" alt="Bee Music Logo" class="nav-logo-img">BEE MUSIC</a>
+    <a href="index.html" class="nav-logo"><img src="logo.png" alt="Bee Music Logo" class="nav-logo-img">BEE MUSIC</a>
     <p class="nav-links">
-        <a href="home.html">Home</a>
+        <a href="index.html">Home</a>
         <a href="artists.html" class="active">Artists</a>
         <a href="upload.html">Upload</a>
         <a href="contact.html">Contact</a>
@@ -809,7 +819,7 @@
 </div>
 
 <!-- Universal liked panel provided by liked-artists.js -->
-
+</div> <!-- END page-content -->
 <div class="site-footer">
     <div class="site-footer-left">
         <div class="footer-logo"><img src="logo.png" alt="Bee Music Logo" class="footer-logo-img">BEE MUSIC</div>
@@ -817,7 +827,7 @@
         <p style="margin-top:4px;font-size:11px;color:#444;">Web Programming Laboratory &nbsp;·&nbsp; Siddhartha Gupta &nbsp;·&nbsp; 24BCE5063</p>
     </div>
     <div class="site-footer-center">
-        <a href="home.html">Home</a>
+        <a href="index.html">Home</a>
         <a href="artists.html">Artists</a>
         <a href="upload.html">Upload</a>
         <a href="contact.html">Contact</a>
