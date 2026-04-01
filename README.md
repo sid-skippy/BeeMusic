@@ -1,5 +1,5 @@
 # <img src="logo.png" width="30"> BeeMusic — Music Discovery Platform
-<img src="preview_1" width="1000">
+<img src="preview_1.png" width="1000">
 BeeMusic is a frontend web application designed to simulate a modern music discovery platform. It allows users to explore artists, browse genres, and interact with dynamic UI elements in an engaging and visually rich environment.
 ---
 
@@ -10,10 +10,10 @@ BeeMusic is a frontend web application designed to simulate a modern music disco
 ---
 
 ## 📸 Preview Images
-<img src="preview_2" width="1000">
+<img src="preview_2.png" width="1000">
 <p align="center">
-  <img src="preview_3" width="49%">
-  <img src="preview_4" width="49%">
+  <img src="preview_3.png" width="49%">
+  <img src="preview_4.png" width="49%">
 </p>
 
 ---
@@ -33,8 +33,8 @@ BeeMusic is a frontend web application designed to simulate a modern music disco
 * Modern UI/UX Design Consistent design, animations, and layout
 
 <p align="center">
-  <img src="preview_5" width="48%" style="vertical-align: middle;">
-  <img src="preview_6" width="48%" style="vertical-align: middle;">
+  <img src="preview_5.png" width="48%" style="vertical-align: middle;">
+  <img src="preview_6.png" width="48%" style="vertical-align: middle;">
 </p>
 
 ---
