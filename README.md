@@ -3,13 +3,13 @@
 BeeMusic is a frontend web application designed to simulate a modern music discovery platform. It allows users to explore artists, browse genres, and interact with dynamic UI elements in an engaging and visually rich environment.
 ---
 
-## 🌐 Live Demo
+## Live Demo
 
 🔗 https://sid-skippy.github.io/BeeMusic/
 
 ---
 
-## 📸 Preview Images
+## Preview Images
 <img src="preview_2.png" width="1000">
 <p align="center">
   <img src="preview_3.png" width="49%">
@@ -18,7 +18,7 @@ BeeMusic is a frontend web application designed to simulate a modern music disco
 
 ---
 
-## 🚀 Features
+## Features
 
 * Artist Exploration Explore and interact with artist cards in a clean and modern design
 
@@ -39,7 +39,7 @@ BeeMusic is a frontend web application designed to simulate a modern music disco
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 * HTML5
   
@@ -49,14 +49,14 @@ BeeMusic is a frontend web application designed to simulate a modern music disco
 
 ---
 
-## ⚠️ Note
+## Note
 
 This project is a **frontend prototype**.
 No backend or database is used. Data (such as liked artists) is stored in the browser using localStorage.
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 index.html
@@ -72,7 +72,7 @@ audio.mp3
 
 ---
 
-## 🎯 Purpose
+## Purpose
 
 This project was developed as part of a Web Development course to demonstrate:
 
@@ -84,6 +84,6 @@ This project was developed as part of a Web Development course to demonstrate:
 
 ---
 
-## 🙌 Acknowledgment
+## Acknowledgment
 
 Built as a student project to explore modern web development concepts and create a realistic user experience without backend integration.
